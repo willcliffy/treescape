@@ -1,0 +1,21 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://0w5ntxxoe2qw"
+path="res://.godot/imported/Low_Poly_Forest_treeRoundTop07Snow.obj-c74f3e2bb53476af29ad4b1a1af78534.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Low_Poly_Forest_treeRoundTop07Snow.obj-c74f3e2bb53476af29ad4b1a1af78534.mesh"]
+
+source_file="res://Content/Trees/OBJ/Low_Poly_Forest_treeRoundTop07Snow.obj"
+dest_files=["res://.godot/imported/Low_Poly_Forest_treeRoundTop07Snow.obj-c74f3e2bb53476af29ad4b1a1af78534.mesh", "res://.godot/imported/Low_Poly_Forest_treeRoundTop07Snow.obj-c74f3e2bb53476af29ad4b1a1af78534.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true

@@ -1,0 +1,74 @@
+[gd_scene load_steps=9 format=3 uid="uid://c6rjq45exjoiu"]
+
+[ext_resource type="PackedScene" uid="uid://bisc3hmj5uops" path="res://Content/Player/ralph_10_baked_final.tscn" id="1_6rc5y"]
+[ext_resource type="Script" path="res://Root.gd" id="1_gpmmr"]
+[ext_resource type="Texture2D" uid="uid://dlnghwecwvg3m" path="res://Content/evening_road_01_puresky_2k.exr" id="2_q0arl"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_hqxph"]
+panorama = ExtResource("2_q0arl")
+
+[sub_resource type="Sky" id="Sky_30hgx"]
+sky_material = SubResource("PanoramaSkyMaterial_hqxph")
+
+[sub_resource type="Environment" id="Environment_t6ecj"]
+background_mode = 2
+sky = SubResource("Sky_30hgx")
+
+[sub_resource type="GDScript" id="GDScript_sm6oe"]
+script/source = "extends CharacterBody3D
+
+
+const SPEED = 5.0
+const JUMP_VELOCITY = 4.5
+
+# Get the gravity from the project settings to be synced with RigidBody nodes.
+var gravity = ProjectSettings.get_setting(\"physics/3d/default_gravity\")
+
+
+func _physics_process(delta):
+	# Add the gravity.
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+
+	# Handle Jump.
+	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
+	# Get the input direction and handle the movement/deceleration.
+	# As good practice, you should replace UI actions with custom gameplay actions.
+	var input_dir = Input.get_vector(\"ui_left\", \"ui_right\", \"ui_up\", \"ui_down\")
+	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	if direction:
+		velocity.x = direction.x * SPEED
+		velocity.z = direction.z * SPEED
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.z = move_toward(velocity.z, 0, SPEED)
+
+	move_and_slide()
+"
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6gtyl"]
+height = 1.5
+
+[node name="Root" type="Node3D"]
+script = ExtResource("1_gpmmr")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.67154, 0.740969, 0, -0.740969, 0.67154, -90.8313, 53.139, 69.1623)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t6ecj")
+
+[node name="Ralph" type="CharacterBody3D" parent="."]
+script = SubResource("GDScript_sm6oe")
+
+[node name="Camera" type="Camera3D" parent="Ralph"]
+transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 10, 10, 10)
+
+[node name="Model" parent="Ralph" instance=ExtResource("1_6rc5y")]
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="CollisionShape" type="CollisionShape3D" parent="Ralph"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.906379, 0)
+shape = SubResource("CapsuleShape3D_6gtyl")
