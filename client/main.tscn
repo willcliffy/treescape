@@ -1,0 +1,45 @@
+[gd_scene load_steps=9 format=3 uid="uid://202jev0ukeox"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_h4y6f"]
+[ext_resource type="Texture2D" uid="uid://27sif7qkx5pn" path="res://assets/skybox/belfast_sunset_puresky_2k.exr" id="2_ilhd0"]
+[ext_resource type="PackedScene" uid="uid://cboqopwuqwuf8" path="res://content/map.tscn" id="3_76vkg"]
+[ext_resource type="PackedScene" uid="uid://bo8iuwymq370r" path="res://content/bishop.tscn" id="4_u2j2i"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_hqxph"]
+panorama = ExtResource("2_ilhd0")
+
+[sub_resource type="Sky" id="Sky_30hgx"]
+sky_material = SubResource("PanoramaSkyMaterial_hqxph")
+
+[sub_resource type="Environment" id="Environment_t6ecj"]
+background_mode = 2
+sky = SubResource("Sky_30hgx")
+ssr_enabled = true
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_gq6ai"]
+height = 25.0
+radius = 1.0
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_h4y6f")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.67154, 0.740969, 0, -0.740969, 0.67154, -94.8179, 53.139, 63.1819)
+light_energy = 0.6
+sky_mode = 1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t6ecj")
+
+[node name="Map" parent="." instance=ExtResource("3_76vkg")]
+
+[node name="CameraBase" type="Area3D" parent="."]
+
+[node name="Collider" type="CollisionShape3D" parent="CameraBase"]
+transform = Transform3D(0.707107, 0.454519, 0.541675, 0, 0.766044, -0.642788, -0.707107, 0.454519, 0.541675, 0, 0, 0)
+shape = SubResource("CylinderShape3D_gq6ai")
+
+[node name="Camera" type="Camera3D" parent="CameraBase/Collider"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 20, 0)
+
+[node name="Player" parent="." instance=ExtResource("4_u2j2i")]

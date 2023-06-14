@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+    <asset>
+        <contributor>
+            <authoring_tool>CINEMA4D 17.053 COLLADA Exporter</authoring_tool>
+        </contributor>
+        <created>2016-09-03T05:02:12Z</created>
+        <modified>2016-09-03T05:02:12Z</modified>
+        <unit meter="0.01" name="centimeter"/>
+        <up_axis>Y_UP</up_axis>
+    </asset>
+    <library_images>
+        <image id="ID3">
+            <init_from>groundEarth_base_color.png</init_from>
+        </image>
+    </library_images>
+    <library_effects>
+        <effect id="ID2">
+            <profile_COMMON>
+                <newparam sid="ID4">
+                    <surface type="2D">
+                        <init_from>ID3</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="ID5">
+                    <sampler2D>
+                        <source>ID4</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="COMMON">
+                    <blinn>
+                        <diffuse>
+                            <texture texture="ID5" texcoord="UVSET0"/>
+                        </diffuse>
+                    </blinn>
+                </technique>
+            </profile_COMMON>
+        </effect>
+    </library_effects>
+    <library_materials>
+        <material id="ID1" name="groundEarth_base_color">
+            <instance_effect url="#ID2"/>
+        </material>
+    </library_materials>
+    <library_geometries>
+        <geometry id="ID8">
+            <mesh>
+                <source id="ID9">
+                    <float_array id="ID10" count="42">0 -25 -0 0 25 -0 50 -25 -0 50 25 -0 25 -25 -43.3 25 25 -43.3 -25 -25 -43.3 -25 25 -43.3 -50 -25 -6.1e-015 -50 25 -6.1e-015 -25 -25 43.3 -25 25 43.3 25 -25 43.3 25 25 43.3</float_array>
+                    <technique_common>
+                        <accessor count="14" source="#ID10" stride="3">
+                            <param name="X" type="float"/>
+                            <param name="Y" type="float"/>
+                            <param name="Z" type="float"/>
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="ID11">
+                    <float_array id="ID12" count="24">-0.866019 0 -0.500011 0.866019 0 -0.500011 -0.866019 0 0.500011 0.866019 0 0.500011 0 0 -1 0 0 1 0 1 -0 0 -1 -0</float_array>
+                    <technique_common>
+                        <accessor count="8" source="#ID12" stride="3">
+                            <param name="X" type="float"/>
+                            <param name="Y" type="float"/>
+                            <param name="Z" type="float"/>
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="ID13">
+                    <float_array id="ID14" count="44">0.167789 0.289254 0.167895 0.45508 0.002089 0.455221 0.001948 0.289395 0.499519 0.289178 0.499464 0.455009 0.333686 0.455008 0.333652 0.289181 0.997073 0.28963 0.996859 0.455456 0.831053 0.455245 0.831232 0.289417 0.66537 0.289275 0.66526 0.455096 0.748122 0.598737 0.665141 0.742316 0.499308 0.742221 0.41648 0.598561 0.665554 0.00207102 0.748363 0.14572 0.416713 0.14549 0.499744 0.001948</float_array>
+                    <technique_common>
+                        <accessor count="22" source="#ID14" stride="2">
+                            <param name="S" type="float"/>
+                            <param name="T" type="float"/>
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="ID15">
+                    <input semantic="POSITION" source="#ID9"/>
+                </vertices>
+                <polylist count="10" material="Material1">
+                    <input offset="0" semantic="VERTEX" source="#ID15"/>
+                    <input offset="1" semantic="NORMAL" source="#ID11"/>
+                    <input offset="2" semantic="TEXCOORD" source="#ID13" set="0"/>
+                    <vcount>4 4 4 4 4 4 4 4 4 4</vcount>
+                    <p>8 0 3 9 0 2 7 0 1 6 0 0 4 1 7 5 1 6 3 1 5 2 1 4 10 2 11 11 2 10 9 2 9 8 2 8 2 3 4 3 3 5 13 3 13 12 3 12 6 4 0 7 4 1 5 4 6 4 4 7 12 5 12 13 5 13 11 5 10 10 5 11 9 6 15 11 6 14 13 6 13 3 6 5 3 6 5 5 6 17 7 6 16 9 6 15 2 7 4 12 7 12 10 7 19 8 7 18 2 7 4 8 7 18 6 7 21 4 7 20</p>
+                </polylist>
+            </mesh>
+        </geometry>
+    </library_geometries>
+    <library_visual_scenes>
+        <visual_scene id="ID6">
+            <node id="ID7" name="groundEarth">
+                <translate sid="translate">0 0 -0</translate>
+                <rotate sid="rotateY">0 1 0 -0</rotate>
+                <rotate sid="rotateX">1 0 0 0</rotate>
+                <rotate sid="rotateZ">0 0 1 -0</rotate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#ID8">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="Material1" target="#ID1">
+                                <bind_vertex_input semantic="UVSET0" input_semantic="TEXCOORD" input_set="0"/>
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#ID6"/>
+    </scene>
+</COLLADA>

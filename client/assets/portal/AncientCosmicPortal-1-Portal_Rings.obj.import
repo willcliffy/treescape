@@ -1,0 +1,21 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b63yj7iawjrj"
+path="res://.godot/imported/AncientCosmicPortal-1-Portal_Rings.obj-a993dd2495ab9f0d0111303c4b7bdc7b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/AncientCosmicPortal-1-Portal_Rings.obj-a993dd2495ab9f0d0111303c4b7bdc7b.mesh"]
+
+source_file="res://assets/portal/AncientCosmicPortal-1-Portal_Rings.obj"
+dest_files=["res://.godot/imported/AncientCosmicPortal-1-Portal_Rings.obj-a993dd2495ab9f0d0111303c4b7bdc7b.mesh", "res://.godot/imported/AncientCosmicPortal-1-Portal_Rings.obj-a993dd2495ab9f0d0111303c4b7bdc7b.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true

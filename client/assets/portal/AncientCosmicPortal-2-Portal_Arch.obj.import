@@ -1,0 +1,21 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://5mhw1o8wxk0g"
+path="res://.godot/imported/AncientCosmicPortal-2-Portal_Arch.obj-5c314bb3519c70d40b4bcefcd3497c0b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/AncientCosmicPortal-2-Portal_Arch.obj-5c314bb3519c70d40b4bcefcd3497c0b.mesh"]
+
+source_file="res://assets/portal/AncientCosmicPortal-2-Portal_Arch.obj"
+dest_files=["res://.godot/imported/AncientCosmicPortal-2-Portal_Arch.obj-5c314bb3519c70d40b4bcefcd3497c0b.mesh", "res://.godot/imported/AncientCosmicPortal-2-Portal_Arch.obj-5c314bb3519c70d40b4bcefcd3497c0b.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
