@@ -1,255 +1,250 @@
-extends Node3D
+extends Node
 
-signal map_loaded(playerLocation)
-
-@onready var nav_region = $NavRegion
-@onready var terrain_container = $NavRegion/Terrain
-@onready var trees_container = $NavRegion/Trees
-@onready var player = $"../Player"
-
-@onready var portal_scene = preload("res://content/map/portal.tscn")
-@onready var cube_scene = preload("res://content/cube.tscn")
-@onready var key_scene = preload("res://content/key.tscn")
-
+## Scenes
+@onready var portal_scene = preload("res://content/map/Portal.tscn")
 @onready var tree_scenes = [
-	preload("res://content/map/trees_alt/tree_01.tscn"),
-	preload("res://content/map/trees_alt/tree_02.tscn"),
-	preload("res://content/map/trees_alt/tree_03.tscn"),
-	preload("res://content/map/trees_alt/tree_04.tscn"),
-	preload("res://content/map/trees_alt/tree_05.tscn"),
-	preload("res://content/map/trees_alt/tree_blob_01.tscn"),
-	preload("res://content/map/trees_alt/tree_blob_02.tscn"),
-	preload("res://content/map/trees_alt/tree_blob_03.tscn"),
-	preload("res://content/map/trees_alt/tree_blob_04.tscn"),
-	preload("res://content/map/trees_alt/tree_round_top_01.tscn"),
-	preload("res://content/map/trees_alt/tree_round_top_02.tscn"),
-	preload("res://content/map/trees_alt/tree_round_top_03.tscn"),
-	preload("res://content/map/trees_alt/tree_round_top_04.tscn"),
-	preload("res://content/map/trees_alt/tree_tall_01.tscn"),
-	preload("res://content/map/trees_alt/tree_tall_02.tscn"),
-	preload("res://content/map/trees_alt/tree_tall_03.tscn"),
-	preload("res://content/map/trees_alt/tree_tall_04.tscn"),
-	preload("res://content/map/trees_alt/tree_tall_05.tscn"),
+	preload("res://content/map/trees/tree_01.tscn"),
+	preload("res://content/map/trees/tree_02.tscn"),
+	preload("res://content/map/trees/tree_03.tscn"),
+	preload("res://content/map/trees/tree_04.tscn"),
+	preload("res://content/map/trees/tree_05.tscn"),
+	preload("res://content/map/trees/tree_blob_01.tscn"),
+	preload("res://content/map/trees/tree_blob_02.tscn"),
+	preload("res://content/map/trees/tree_blob_03.tscn"),
+	preload("res://content/map/trees/tree_blob_04.tscn"),
+	preload("res://content/map/trees/tree_round_top_01.tscn"),
+	preload("res://content/map/trees/tree_round_top_02.tscn"),
+	preload("res://content/map/trees/tree_round_top_03.tscn"),
+	preload("res://content/map/trees/tree_round_top_04.tscn"),
+	preload("res://content/map/trees/tree_tall_01.tscn"),
+	preload("res://content/map/trees/tree_tall_02.tscn"),
+	preload("res://content/map/trees/tree_tall_03.tscn"),
+	preload("res://content/map/trees/tree_tall_04.tscn"),
+	preload("res://content/map/trees/tree_tall_05.tscn"),
 ]
 
-const GREEN = Color("#556B2F")
-const BROWN = Color("#3D1F00")
-const TAN = Color("#d2b48c")
-const DEEP_BLUE = Color("#0000ff")
+## Resources (Materials, Noise functions, ...)
+@onready var terrain_material = preload("res://content/map/terrain/terrain_material.tres")
+@onready var river_noise = preload("res://content/map/river/river_noise.tres")
 
-# Terrain noise
-const TERRAIN_NOISE_SEED = 0
-const TERRAIN_NOISE_FREQUENCY = 0.01
-const TERRAIN_NOISE_FRACTAL_OCTIVES = 2
-const TERRAIN_NOISE_FRACTAL_GAIN = 0.01
-
-# River noise
-const RIVER_NOISE_SEED = 0
-const RIVER_NOISE_FREQUENCY = 0.012
-const RIVER_NOISE_FRACTAL_OCTIVES = 1
-const RIVER_NOISE_FRACTAL_GAIN = 1
-
-# Terrain config
-const TERRAIN_RADIUS = 55.0
-const TERRAIN_UNDULATION_DEPTH = 0.9
-
-# River config
-const CHANNEL_THRESHOLD = 0.60
-const CHANNEL_BANK_THRESHOLD = 0.55
-const CHANNEL_DEPTH = 7.0
-
-# Tree config
-const TREE_DISTANCE = 7.0 # Minimum distance between trees
-
-# Outer bank config
-const BANK_START_DISTANCE = 0.9 * TERRAIN_RADIUS
-const MAX_BANK_DEPTH = CHANNEL_DEPTH
-
-# Landing area config
-const LANDING_AREA_RADIUS = 17.5
-const LANDING_AREA_HEIGHT = -0.25
+## Misc
+@onready var nav_map = get_parent().get_world_3d().get_navigation_map()
 
 
-# Class fields
+## Noise
+var terrain_undulation_noise: FastNoiseLite
+
+const TERRAIN_UNDULATION_RADIUS = 1.0
+const RIVER_DEPTH_RADIUS = 3.5
+const BANK_DEPTH = 10.0
+const BANK_LENGTH = 20.0
+
+## Rendering
+var _render_distance: int
+var _chunk_size: int
+var _chunk_density: int
+
+#var _target: Node3D
+var _loaded_chunks: Dictionary
+
+
+## Terrain generation
+var _needs_collider: bool
+
 var tree_locations = []
-var landing_location
-
-
-func lerp_float(a: float, b: float, t: float) -> float:
-	return (1.0 - t) * a + t * b
+const TREE_DISTANCE = 5.0 # Minimum distance between trees
+const TREE_START_HEIGHT = 0
 
 
 func _ready():
-	# Generate base terrain, including channels for water
-	var terrain = generate_terrain()
-
-	# Add the spawn area
-	var magic_value = round(0.5 * TERRAIN_RADIUS + LANDING_AREA_RADIUS / 2.0)
+	NavigationServer3D.map_set_edge_connection_margin(nav_map, 5)
 	
-	landing_location = Vector3(magic_value, 4 * LANDING_AREA_HEIGHT, magic_value)
-	var portal_location = landing_location - Vector3(LANDING_AREA_RADIUS / 4.0, 0, LANDING_AREA_RADIUS / 4.0)
-	var player_location = landing_location + Vector3(LANDING_AREA_RADIUS / 4.0, 0, LANDING_AREA_RADIUS / 4.0)
+	#_target = get_parent().get_node("Player")
+	_loaded_chunks = {}
 
-	terrain = generate_landing_area(landing_location, terrain[0], terrain[1])
+	## render options
+	_render_distance = 6
+	_chunk_size = 16
+	_chunk_density = 4
 
-	# Place objects like trees, bushes, and other obstacles.
-	place_terrain_objects(terrain[0], terrain[1])
+	## terrain generation options
+	_needs_collider = true
+
+	terrain_undulation_noise = FastNoiseLite.new()
+	terrain_undulation_noise.fractal_octaves = 2
+	terrain_undulation_noise.fractal_gain = 0.1
+	terrain_undulation_noise.frequency = 0.02
+
+	# see: https://docs.godotengine.org/en/4.0/tutorials/navigation/navigation_using_navigationservers.html#waiting-for-synchronization
+	await get_tree().physics_frame
+	generate()
+#
+#	var packed_scene = PackedScene.new()
+#	packed_scene.pack(get_tree().get_current_scene())
+#	ResourceSaver.save(packed_scene, "res://my_scene.tscn")
 
 	# Instantiate Portal
-	var portal_instance = portal_scene.instantiate()
-	portal_instance.transform.origin = portal_location
-	nav_region.add_child(portal_instance)
-	portal_instance.set_owner(self)
-
-	player.activated_portal.connect(portal_instance.enable)
-
-	# Bake Navigation Mesh
-	var start_time = Time.get_ticks_msec()
-	nav_region.bake_finished.connect(
-		func():
-			var elapsed = (Time.get_ticks_usec() - start_time) / 1000000.0
-			print("NavMesh bake finished after %f seconds" % elapsed)
-			map_loaded.emit(player_location)
-	)
-	nav_region.bake_navigation_mesh()
-	
-	var red_key_instance = key_scene.instantiate()
-	var red_key_spawn = landing_location + Vector3(LANDING_AREA_RADIUS/2, 1, 0) 
-	red_key_instance.spawn(Color("red"), red_key_spawn)
-	add_child(red_key_instance)
-	red_key_instance.set_owner(self)
-	
-	var green_key_instance = key_scene.instantiate()
-	var green_key_spawn = landing_location + Vector3(LANDING_AREA_RADIUS/2, 1, LANDING_AREA_RADIUS/2) 
-	green_key_instance.spawn(Color("green"), green_key_spawn)
-	add_child(green_key_instance)
-	green_key_instance.set_owner(self)
-
-	var blue_key_instance = key_scene.instantiate()
-	var blue_key_spawn = landing_location + Vector3(0, 1, LANDING_AREA_RADIUS/2)
-	blue_key_instance.spawn(Color("blue"), blue_key_spawn)
-	add_child(blue_key_instance)
-	blue_key_instance.set_owner(self)
-	
-	var packedScene = PackedScene.new()
-	packedScene.pack(self)
-	ResourceSaver.save(packedScene,"res://maps/map_seed_0_0_0.tscn")
+#	var portal_instance = portal_scene.instantiate()
+#	add_child(portal_instance)
+#	portal_instance.set_owner(self)
+#	player.activated_portal.connect(portal_instance.enable)
 
 
+### Terrain generation ###
 
-func generate_terrain():
-	var terrain_dictionary = {}
-	var max_height = float("-inf")
+func generate() -> void:
+	var position = Vector3.ZERO
+	if position.x < 0: position.x -= _chunk_size
+	if position.z < 0: position.z -= _chunk_size
+	var chunk_x: int = int(position.x / _chunk_size)
+	var chunk_z: int = int(position.z / _chunk_size)
 
-	var terrain_noise = FastNoiseLite.new()
-	terrain_noise.seed = TERRAIN_NOISE_SEED
-	terrain_noise.frequency = TERRAIN_NOISE_FREQUENCY
-	terrain_noise.fractal_octaves = TERRAIN_NOISE_FRACTAL_OCTIVES
-	terrain_noise.fractal_gain = TERRAIN_NOISE_FRACTAL_GAIN
-
-	var river_noise = FastNoiseLite.new()
-	river_noise.seed = RIVER_NOISE_SEED
-	river_noise.frequency = RIVER_NOISE_FREQUENCY
-	river_noise.fractal_octaves = RIVER_NOISE_FRACTAL_OCTIVES
-	river_noise.fractal_gain = RIVER_NOISE_FRACTAL_OCTIVES
-	river_noise.fractal_type = FastNoiseLite.FRACTAL_RIDGED
-
-	for x in range(-TERRAIN_RADIUS, TERRAIN_RADIUS):
-		for z in range(-TERRAIN_RADIUS, TERRAIN_RADIUS):
-			var dist_to_center = Vector2(x, z).length()
-			if dist_to_center > TERRAIN_RADIUS:
+	for ix in range(chunk_x - _render_distance, chunk_x + _render_distance + 1):
+		for iz in range(chunk_z - _render_distance, chunk_z + _render_distance + 1):
+			var chunk_position = Vector2(ix, iz)
+			if chunk_position.distance_to(Vector2(chunk_x, chunk_z)) > _render_distance: 
 				continue
-
-			var terrain_noise_sample = terrain_noise.get_noise_2d(x, z)
-			var height = terrain_noise_sample * TERRAIN_UNDULATION_DEPTH 
-
-			var color_gradient = (terrain_noise_sample + 1.01) / 2
-			var color = BROWN.lerp(GREEN, color_gradient)
-
-			var channel_gradient = (river_noise.get_noise_2d(x, z) + 0.99) / 2.0
-			if channel_gradient > CHANNEL_THRESHOLD:
-				var channelDepth = max((channel_gradient - CHANNEL_THRESHOLD) * CHANNEL_DEPTH, 0)
-				height -= channelDepth
-
-			# Create bank around the island
-			if dist_to_center > BANK_START_DISTANCE:
-				var bank_gradient = (dist_to_center - BANK_START_DISTANCE) / (TERRAIN_RADIUS - BANK_START_DISTANCE)
-				height -= bank_gradient * MAX_BANK_DEPTH
-				color = color.lerp(DEEP_BLUE, bank_gradient)
-
-			terrain_dictionary[Vector2(x, z)] = {"height": height, "color": color, "channel": channel_gradient}
-
-			# update max height
-			if height > max_height:
-				max_height = height
-
-	return [terrain_dictionary, max_height]
-
-func generate_landing_area(center, terrain_dictionary, max_height):
-	for x in range(center.x - LANDING_AREA_RADIUS, center.x + LANDING_AREA_RADIUS):
-		for z in range(center.z - LANDING_AREA_RADIUS, center.z + LANDING_AREA_RADIUS):
-			var dist_from_center = Vector3(x, 0, z) - center
-			if dist_from_center.length() > LANDING_AREA_RADIUS:
+			if _loaded_chunks.has(make_chunk_key(chunk_position)): 
 				continue
-			
-			var location = Vector2(x, z)
-			var height = LANDING_AREA_HEIGHT
-			
-			var magic_cutoff_for_blending_terrain = 0.885 * BANK_START_DISTANCE
-			
-			if location in terrain_dictionary:
-				if location.length() <= magic_cutoff_for_blending_terrain:
-					height = lerp_float(height, terrain_dictionary[location]["height"], dist_from_center.length() / LANDING_AREA_RADIUS)
+			add_chunk(Vector2(ix, iz))
 
-			terrain_dictionary[Vector2(x, z)] = {"height": height, "color": Color("black"), "channel": 0}
-
-	return [terrain_dictionary, max_height]
+	for key in _loaded_chunks:
+		var chunk_pos = parse_chunk_key(key)
+		if chunk_pos.distance_to(Vector2(chunk_x, chunk_z)) > _render_distance:
+			remove_chunk(key)
 
 
-func place_terrain_objects(terrain_dictionary, max_height):
-	for key in terrain_dictionary.keys():
-		var x = key.x
-		var z = key.y
+func add_chunk(chunk_position: Vector2) -> void:
+	var position = Vector3(chunk_position.x * _chunk_size, 0, chunk_position.y * _chunk_size)
 
-		var terrain_height = terrain_dictionary[key]["height"] - max_height
-		var terrain_color = terrain_dictionary[key]["color"]
-		var channel_gradient = terrain_dictionary[key]["channel"]
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
 
-		var cube_instance = cube_scene.instantiate()
+	var verts = PackedVector3Array()
+	var norms = PackedVector3Array()
+	var uvs   = PackedVector2Array()
+	var inds  = PackedInt32Array()
 
-		cube_instance.transform.origin = Vector3(x, terrain_height, z)
+	var vert_step = float(_chunk_size) / _chunk_density
+	var uv_step   = 1.0 / _chunk_density 
 
-		var cube_mesh = cube_instance.get_node("Mesh")
-		cube_mesh.material_override = StandardMaterial3D.new()
-		cube_mesh.material_override.albedo_color = terrain_color
+	var chunk_mesh = MeshInstance3D.new()
+	chunk_mesh.mesh = ArrayMesh.new()
 
-		terrain_container.add_child(cube_instance)
-		cube_instance.set_owner(self)
+	for x in _chunk_density + 1:
+		for z in _chunk_density + 1:
+			var vert = Vector3(position.x + x * vert_step, 0.0, position.z + z * vert_step)
+			var uv = Vector2(1.0 - x * uv_step, 1.0 - z * uv_step)
 
-		if channel_gradient > CHANNEL_BANK_THRESHOLD:
-			continue
+			vert.y = sample_terrain_noise(vert.x, vert.z)
 
-		var tree_location = Vector3(x, terrain_height, z)
-		if tree_location.length() > BANK_START_DISTANCE:
-			continue
+			var tree_instance = try_place_tree(vert)
+			if tree_instance:
+				chunk_mesh.add_child(tree_instance)
+				tree_instance.set_owner(chunk_mesh)
 
-		# Check if the new tree is far enough from existing structures
-		if tree_location.distance_to(landing_location) < LANDING_AREA_RADIUS:
-			continue
+			var top = vert - Vector3(vert.x, sample_terrain_noise(vert.x, vert.z + vert_step), vert.z + vert_step)
+			var right = vert - Vector3(vert.x + vert_step, sample_terrain_noise(vert.x + vert_step, vert.z), vert.z)
+			var norm = top.cross(right).normalized()
 
-		var too_close = false
-		for pos in tree_locations:
-			if pos.distance_to(tree_location) < TREE_DISTANCE:
-				too_close = true
-				break
+			verts.push_back(vert)
+			norms.push_back(norm)
+			uvs.push_back(uv)
 
-		if not too_close:
-			var tree_type = randi() % len(tree_scenes) # Randomly select a type of tree
-			var tree_instance = tree_scenes[tree_type].instantiate() # Instantiate the selected tree
-			tree_instance.transform.origin = tree_location # Place the tree on top of the terrain block
-			var random_rotation = Quaternion(Vector3.UP, randf_range(0, 360)) # Generate a random rotation quaternion
-			tree_instance.transform.basis = Basis(random_rotation) # Set the rotation of the tree instance
-			trees_container.add_child(tree_instance) # Add the tree to the scene
-			tree_instance.set_owner(self)
-			tree_locations.append(tree_location)
+			# Make & index a clockwise face from verts a, b, c, d
+			if x < _chunk_density and z < _chunk_density:
+				var a = z + x * (_chunk_density + 1)
+				var b = a + 1
+				var d = (_chunk_density + 1) * (x + 1) + z
+				var c = d + 1
+
+				inds.push_back(d) 
+				inds.push_back(b)
+				inds.push_back(a)
+
+				inds.push_back(d)
+				inds.push_back(c)
+				inds.push_back(b)
+
+	arr[Mesh.ARRAY_VERTEX] = verts
+	arr[Mesh.ARRAY_TEX_UV] = uvs
+	arr[Mesh.ARRAY_NORMAL] = norms
+	arr[Mesh.ARRAY_INDEX]  = inds
+
+	chunk_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	chunk_mesh.mesh.surface_set_material(0, terrain_material)
+
+	_loaded_chunks[make_chunk_key(chunk_position)] = chunk_mesh
+
+	if not _needs_collider:
+		$Terrain.add_child(chunk_mesh)
+		chunk_mesh.set_owner(self)
+		return
+
+	chunk_mesh.create_trimesh_collision()
+	$Terrain.add_child(chunk_mesh)
+	chunk_mesh.set_owner($Terrain)
+
+	# TODO - keep track of and clean up nav regions
+	var region: RID = NavigationServer3D.region_create()
+	NavigationServer3D.region_set_transform(region, Transform3D())
+	NavigationServer3D.region_set_map(region, nav_map)
+	var nav_mesh: NavigationMesh = NavigationMesh.new()
+	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
+	nav_mesh.agent_radius = 1
+	nav_mesh.agent_height = 3
+	nav_mesh.agent_max_slope = 30
+	NavigationServer3D.region_set_navigation_mesh(region, nav_mesh)
+	NavigationServer3D.region_bake_navigation_mesh(nav_mesh, chunk_mesh)
+
+
+func try_place_tree(terrain_pos: Vector3) -> Node3D:
+	if terrain_pos.y <= TREE_START_HEIGHT:
+		return
+
+	
+
+	for pos in tree_locations:
+		if pos.distance_to(terrain_pos) < TREE_DISTANCE:
+			return null
+
+	var tree_type = randi() % len(tree_scenes) # Randomly select a type of tree
+	var tree_instance = tree_scenes[tree_type].instantiate() # Instantiate the selected tree
+	tree_instance.transform.origin = terrain_pos - Vector3(0, 0.5, 0) # Place the tree on top of the terrain block
+	var random_rotation = Quaternion(Vector3.UP, randf_range(0, 360)) # Generate a random rotation quaternion
+	tree_instance.transform.basis = Basis(random_rotation) # Set the rotation of the tree instance
+	tree_locations.append(terrain_pos)
+	return tree_instance
+
+
+func remove_chunk(key: String) -> void:
+	var chunk = _loaded_chunks[key]
+	var erased = _loaded_chunks.erase(key)
+	# TODO - keep track of and clean up nav regions
+	if erased: chunk.queue_free()
+
+
+func make_chunk_key(chunk_position: Vector2) -> String:
+	return str(chunk_position.x, ",", chunk_position.y)
+
+
+func parse_chunk_key(key: String) -> Vector2:
+	var arr_vec = key.split(",")
+	#print(Vector2(int(arr_vec[0]), int(arr_vec[1])))
+	return Vector2(int(arr_vec[0]), int(arr_vec[1]))
+
+
+func sample_terrain_noise(x: float, z: float) -> float:
+	var undulation_noise_sample = (terrain_undulation_noise.get_noise_2d(x, z) + 1.0) / 2.0
+	var sample = undulation_noise_sample * TERRAIN_UNDULATION_RADIUS
+
+	var river_noise_sample = river_noise.get_noise_2d(x, z)
+	if river_noise_sample > 0:
+		sample -= river_noise_sample * RIVER_DEPTH_RADIUS
+
+	var dist_from_bank = 0.7 * _render_distance * _chunk_size - Vector2(x, z).length()
+	if dist_from_bank < 0:
+		sample += BANK_DEPTH * dist_from_bank / BANK_LENGTH
+
+	return sample
 

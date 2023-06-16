@@ -1,55 +1,63 @@
-extends Node3D
-
-@onready var cameraBase = $CameraBase/Collider
-@onready var camera = $CameraBase/Collider/Camera
-@onready var treesContainer = $Map/NavRegion/Trees
-
-var camera_height : float = 2.0
-var camera_rotation_speed : float = 50.0
-
-const RAY_CAST_LENGTH = 500
+extends Node
 
 
-#func _ready():
-#	$Map.map_loaded.connect(
-#		func(playerSpawn):
-#			$Player.rpc_set_position.rpc(playerSpawn)
-#	)
+@onready var Player = preload("res://content/Player.tscn")
+
+const PORT = 8080
+
+var multiplayer_peer = WebSocketMultiplayerPeer.new()
 
 
-func _input(event):
-	if not event is InputEventMouseButton: return
-
-	if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var from = camera.project_ray_origin(event.position)
-		var to = from + camera.project_ray_normal(event.position) * RAY_CAST_LENGTH
-		var params := PhysicsRayQueryParameters3D.create(from, to, 4294967295, [$Player, treesContainer])
-		var raycast_result = get_parent().get_world_3d().direct_space_state.intersect_ray(params)
-		var map = get_parent().get_world_3d().navigation_map
-		var target_point := NavigationServer3D.map_get_closest_point_to_segment(map, from, to)
-
-		if raycast_result.size() > 0:
-			$Player.rpc_set_moving.rpc(target_point)
-
-	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-		camera.position.y -= 1
-	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		camera.position.y += 1
+func _ready():
+	if "--server" in OS.get_cmdline_args():
+		start_server()
 
 
-func _physics_process(delta):
-	if not Input.is_anything_pressed():
+func start_server():
+	var err := multiplayer_peer.create_server(PORT)
+	if err != OK:
+		print("failed to start server: ", err)
 		return
 
-	if Input.is_key_pressed(KEY_Q):
-		$Player.rpc_attempt_portal_activation.rpc()
+	multiplayer.peer_connected.connect(
+		func(peer_id):
+			print("player connected: ", peer_id)
+			var player = Player.instantiate()
+			player.name = str(peer_id)
+			add_child(player)
+	)
+
+	multiplayer.peer_disconnected.connect(
+		func(peer_id):
+			print("player disconnected: ", peer_id)
+			var player = get_node_or_null(str(peer_id))
+			if player:
+				player.queue_free()
+	)
+
+	multiplayer.multiplayer_peer = multiplayer_peer
+	print("server listening on port: ", PORT)
+
+
+func start_client(address):
+	print("attempting connection to ", address)
+	var err = multiplayer_peer.create_client(address)
+	if err != OK:
+		printerr("Failed to connect to game server: %s" % err)
 		return
 
-	var rotate_horizontal := Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
-	var rotate_vertical := Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
+	multiplayer.multiplayer_peer = multiplayer_peer
 
-	var new_rotation = cameraBase.rotation_degrees
-	new_rotation.y += rotate_horizontal * delta * camera_rotation_speed
-	# Rotate on X by "move_up" - "move_down". Clamped between -90 (top view) and 0 (side view).
-	new_rotation.x = clamp(new_rotation.x + rotate_vertical * delta * camera_rotation_speed, 5, 85)
-	cameraBase.rotation_degrees = new_rotation
+
+func _on_address_text_submitted(new_text):
+	$UI.hide()
+	start_client(new_text)
+
+
+func _on_join_pressed():
+	$UI.hide()
+	start_client($UI/Address.text)
+
+
+func _on_host_pressed():
+	start_server()
