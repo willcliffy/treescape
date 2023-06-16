@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://ugg6wqgw8xmk"]
+[gd_scene load_steps=2 format=3 uid="uid://ugg6wqgw8xmk"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_o5hc3"]
-[ext_resource type="PackedScene" uid="uid://bqfjt03x1tiqw" path="res://content/World.tscn" id="3_06nhv"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_o5hc3")
@@ -9,8 +8,6 @@ script = ExtResource("1_o5hc3")
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://content/Player.tscn")
 spawn_path = NodePath("..")
-
-[node name="World" parent="." instance=ExtResource("3_06nhv")]
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
@@ -34,12 +31,11 @@ text = "join
 
 [node name="Address" type="LineEdit" parent="UI"]
 layout_mode = 0
-offset_left = 414.0
+offset_left = 268.0
 offset_top = 175.0
-offset_right = 702.0
+offset_right = 849.0
 offset_bottom = 206.0
-text = "ws://localhost:8080"
-placeholder_text = "ws://localhost:8080"
+text = "wss://clownfish-app-w3tew.ondigitalocean.app/"
 alignment = 1
 
 [connection signal="pressed" from="UI/Host" to="." method="_on_host_pressed"]

@@ -26,12 +26,11 @@ func _enter_tree():
 
 
 func _ready():
-	print(is_multiplayer_authority())
 	if not is_multiplayer_authority(): return
 
 	Camera.current = true
 	NavAgent.velocity_computed.connect(
-		func(safe_velocity: Vector3):
+		func(safe_velocity):
 			velocity = safe_velocity
 			move_and_slide()
 	)
@@ -81,10 +80,10 @@ func _physics_process(delta):
 
 
 func handle_camera_zoom_input(event):
-	if event.button_index == MOUSE_BUTTON_WHEEL_UP and Camera.position.y > 2:
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP and Camera.position.y > 5:
 		Camera.position.y -= 1
 		return
-	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 30:
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 500:
 		Camera.position.y += 1
 		return
 

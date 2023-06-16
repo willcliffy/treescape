@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://d4ljgfv3pdwlb"]
+
+[ext_resource type="Shader" path="res://content/world/water/water.gdshader" id="1_dpkxe"]
+[ext_resource type="Texture2D" uid="uid://wg04sh7tg8f4" path="res://content/world/water/water_noise_1.tres" id="2_h001c"]
+[ext_resource type="Texture2D" uid="uid://cjcbkdj337sfb" path="res://content/world/water/water_noise_2.tres" id="3_55isw"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_dpkxe")
+shader_parameter/sourceColor = Color(0, 0.14902, 0.392157, 1)
+shader_parameter/textureVertexInput = ExtResource("2_h001c")
+shader_parameter/textureFragmentInput_1 = ExtResource("2_h001c")
+shader_parameter/textureFragmentInput_2 = ExtResource("3_55isw")

@@ -2,6 +2,7 @@ extends Node
 
 
 @onready var Player = preload("res://content/Player.tscn")
+@onready var World = preload("res://content/world/World.tscn")
 
 const PORT = 8080
 
@@ -24,7 +25,7 @@ func start_server():
 			print("player connected: ", peer_id)
 			var player = Player.instantiate()
 			player.name = str(peer_id)
-			add_child(player)
+			add_child(player) # replicated to all clients through MultiplayerSpawner
 	)
 
 	multiplayer.peer_disconnected.connect(
@@ -47,6 +48,7 @@ func start_client(address):
 		return
 
 	multiplayer.multiplayer_peer = multiplayer_peer
+	add_child(World.instantiate())
 
 
 func _on_address_text_submitted(new_text):
