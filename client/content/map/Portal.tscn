@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://1nyevhuj2gcf"]
+
+[ext_resource type="Script" path="res://content/map/portal.gd" id="1_0xupk"]
+[ext_resource type="ArrayMesh" uid="uid://b63yj7iawjrj" path="res://assets/portal/AncientCosmicPortal-1-Portal_Rings.obj" id="2_eruub"]
+[ext_resource type="ArrayMesh" uid="uid://5mhw1o8wxk0g" path="res://assets/portal/AncientCosmicPortal-2-Portal_Arch.obj" id="3_r15pw"]
+[ext_resource type="ArrayMesh" uid="uid://dhibfd1xfkmlc" path="res://assets/portal/AncientCosmicPortal-0-Portal_Stairs.obj" id="4_cfvfx"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_8wvw1"]
+points = PackedVector3Array(0.399961, 3.5, -1.40009, 0.699785, 3.39986, -1.30006, 0.399961, 3.5, -1.90002, 0, 3.5, -1.30006, 0.899765, 3.29973, -1.30006, 0.699785, 3.39986, -2.00005, 0.299824, 0.599843, -1.1, 0, 3.5, -2.00005, -0.300117, 3.5, -1.30006, 0.899765, 3.29973, -2.00005, 0.999902, 3.19988, -1.30006, 0.299824, 0.599843, -2.2, -0.300117, 0.599843, -1.1, 0.299824, 0.5, -1.1, 1.5, 2.29982, -1.30006, 1.39986, 2.69978, -1.30006, 1.29973, 2.89977, -1.30006, 1.19988, 2.9999, -1.30006, -0.300117, 3.5, -2.00005, -0.600235, 3.5, -1.50001, -1.30002, 3.09975, -1.50001, -1.30002, 2.89977, -1.30006, 0.999902, 3.19988, -2.00005, 0.299824, 0.5, -2.2, -0.300117, 0.599843, -2.2, 1.19988, 2.9999, -2.00005, 1.29973, 2.89977, -2.00005, 1.39986, 2.69978, -2.00005, 1.5, 2.29982, -2.00005, -0.300117, 0.5, -1.1, -1.5, 2.29982, -1.30006, 0.399961, 0.5, -1.20003, 0.699785, 0.599843, -1.30006, 0.899765, 0.69998, -1.30006, 1.29973, 1.09994, -1.30006, 1.5, 1.59975, -1.30006, 1.5, 2.39996, -1.40009, -0.900059, 3.29973, -2.00005, -0.600235, 3.5, -1.60004, -1.30002, 3.09975, -1.60004, -1.5, 2.39996, -1.40009, -1.40016, 2.69978, -1.40009, 1.5, 1.59975, -2.00005, 1.29973, 1.09994, -2.00005, 0.899765, 0.69998, -2.00005, 0.699785, 0.599843, -2.00005, 0.399961, 0.5, -2.10008, -0.300117, 0.5, -2.2, -1.5, 2.29982, -2.00005, -1.30002, 2.89977, -2.00005, 1.5, 2.39996, -1.90002, -0.700078, 0.599843, -1.30006, -0.400254, 0.5, -1.20003, -1.5, 1.59975, -1.30006, -1.30002, 1.09994, -1.30006, -1.20018, 0.999804, -1.30006, -1.0002, 0.799824, -1.30006, 0.999902, 0.799824, -1.40009, 1.19988, 0.999804, -1.40009, 1.39986, 1.29992, -1.40009, -1.30002, 2.9999, -1.90002, -1.40016, 2.69978, -1.90002, -1.5, 2.39996, -1.90002, 1.39986, 1.29992, -1.90002, 1.19988, 0.999804, -1.90002, 0.999902, 0.799824, -1.90002, -0.400254, 0.5, -2.10008, -0.700078, 0.599843, -2.00005, -1.0002, 0.799824, -2.00005, -1.20018, 0.999804, -2.00005, -1.30002, 1.09994, -2.00005, -1.5, 1.59975, -2.00005, -0.900059, 0.69998, -1.40009, -1.40016, 1.29992, -1.40009, -0.900059, 0.69998, -1.90002, -1.40016, 1.29992, -1.90002)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_e0dke"]
+points = PackedVector3Array(1.6, 0.1, -0.700313, 1.39984, 0.2, 0.499804, 1.6, 0, -0.700313, 1.6, 0.1, -0.800157, 0.4, 0.8, -1.00018, 0.899922, 0.4, 0.299785, 1.09976, 0.2, 0.699824, 1.39984, 0, 0.499804, 1.6, 0, -0.800157, 1.29992, 0.1, -2.00027, 0.8, 0.5, -2.10012, 0.899922, 0.5, -1.2002, 0.4, 0.8, -1.10002, 0.299765, 0.8, -1.00018, -0.500235, 0.5, -7.82013e-05, 0.8, 0.4, 0.299785, 0.999843, 0.2, 0.699824, 0.899922, 0.1, 0.8, 1.09976, 0, 0.699824, 1.29992, 0, -2.00027, 1.09976, 0.1, -2.50016, 0.699765, 0.5, -2.20029, 0.299765, 0.8, -1.10002, -0.500235, 0.6, -1.2002, -1.50008, 0.3, -0.500294, -0.600157, 0.5, -7.82013e-05, -0.700078, 0.1, 0.699824, 0.699765, 0.1, 0.8, 0.899922, 0, 0.8, 1.09976, 0, -2.50016, -1.00016, 0.1, -2.6, 0.699765, 0.4, -2.30014, -0.700078, 0.5, -2.20029, -0.500235, 0.6, -1.30004, -0.8, 0.5, -2.10012, -1.50008, 0.3, -0.600137, -1.6, 0.2, -0.500294, -1.40016, 0.1, 0.59998, -0.700078, 0, 0.699824, 0.699765, 0, 0.8, -1.00016, 0, -2.6, -1.10008, 0.1, -2.6, -1.30023, 0.1, -2.50016, -1.6, 0.2, -0.600137, -1.6, 0.1, -0.300274, -1.40016, 0, 0.59998, -1.10008, 0, -2.6, -1.30023, 0, -2.50016, -1.6, 0, -0.600137, -1.6, 0, -0.300274)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_7awce"]
+radius = 3.0
+
+[node name="Portal" type="Node3D"]
+transform = Transform3D(1.41421, 0, 1.41421, 0, 2, 0, -1.41421, 0, 1.41421, 0, 0, 0)
+script = ExtResource("1_0xupk")
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 2, -1.75)
+visible = false
+
+[node name="RingMesh" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 1.5)
+mesh = ExtResource("2_eruub")
+skeleton = NodePath("../..")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Node3D"]
+light_color = Color(0, 1, 0, 1)
+light_energy = 10.0
+omni_range = 8.0
+omni_attenuation = 0.105112
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="ArchMesh" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = ExtResource("3_r15pw")
+skeleton = NodePath("../..")
+
+[node name="ArchCollider" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_8wvw1")
+
+[node name="StairsMesh" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = ExtResource("4_cfvfx")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_e0dke")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_7awce")
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_exited" from="Area3D" to="." method="_on_area_3d_body_exited"]
