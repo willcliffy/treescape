@@ -2,11 +2,11 @@
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_3mdas"]
 noise_type = 2
-frequency = 0.1
 fractal_type = 0
 cellular_distance_function = 1
 cellular_jitter = 1.5
 
 [resource]
 seamless = true
+normalize = false
 noise = SubResource("FastNoiseLite_3mdas")

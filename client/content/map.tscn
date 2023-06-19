@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://bhh6ujj354v1a"]
+[gd_scene load_steps=3 format=3 uid="uid://7v3kxuitokf"]
 
-[ext_resource type="Material" uid="uid://d4ljgfv3pdwlb" path="res://content/world/water/water_material.tres" id="2_eaala"]
+[ext_resource type="PlaneMesh" uid="uid://cbwadq86vx820" path="res://content/world/water/water_mesh.tres" id="1_uoif5"]
 
 [sub_resource type="GDScript" id="GDScript_al5wi"]
 script/source = "class_name TerrainGenerator
@@ -256,30 +256,11 @@ func sample_terrain_noise(x: float, z: float) -> float:
 
 "
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_iru4o"]
-material = ExtResource("2_eaala")
-size = Vector2(600, 600)
-subdivide_width = 75
-subdivide_depth = 75
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kn6jk"]
-albedo_color = Color(0, 0, 0, 1)
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_k0rop"]
-material = SubResource("StandardMaterial3D_kn6jk")
-top_radius = 200.0
-height = 0.1
-
 [node name="Map" type="Node3D"]
 script = SubResource("GDScript_al5wi")
 
 [node name="Water" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, -1.5, 0)
-mesh = SubResource("PlaneMesh_iru4o")
-
-[node name="SeaFloor" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
-visible = false
-mesh = SubResource("CylinderMesh_k0rop")
+mesh = ExtResource("1_uoif5")
 
 [node name="Terrain" type="Node3D" parent="."]

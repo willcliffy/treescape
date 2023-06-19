@@ -2,13 +2,14 @@ extends CharacterBody3D
 
 signal activated_portal
 
+
 @onready var NavAgent = $NavAgent
 @onready var Character = $Character
 @onready var Animations = $Character/AnimationPlayer
 @onready var CameraBase = $CameraBase/Collider
 @onready var Camera = $CameraBase/Collider/Camera
 
-const SPEED = 200.0
+const SPEED = 250.0
 const TURN_SPEED = 20.0
 
 const CAMERA_ROTATION_SPEED = 50.0
@@ -34,10 +35,12 @@ func _ready():
 			velocity = safe_velocity
 			move_and_slide()
 	)
+	print("emiiting")
 
 
 func _input(event):
 	if not is_multiplayer_authority(): return
+	
 	if not event is InputEventMouseButton: return
 
 	handle_camera_zoom_input(event)

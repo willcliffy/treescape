@@ -41,6 +41,10 @@ func start_server():
 
 
 func start_client(address):
+	print("loading world")
+	var world = World.instantiate()
+	add_child(world)
+
 	print("attempting connection to ", address)
 	var err = multiplayer_peer.create_client(address)
 	if err != OK:
@@ -48,7 +52,6 @@ func start_client(address):
 		return
 
 	multiplayer.multiplayer_peer = multiplayer_peer
-	add_child(World.instantiate())
 
 
 func _on_address_text_submitted(new_text):

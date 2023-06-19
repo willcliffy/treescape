@@ -1,0 +1,9 @@
+[gd_resource type="PlaneMesh" load_steps=2 format=3 uid="uid://cbwadq86vx820"]
+
+[ext_resource type="Material" uid="uid://d4ljgfv3pdwlb" path="res://content/world/water/water_material.tres" id="1_hiwso"]
+
+[resource]
+material = ExtResource("1_hiwso")
+size = Vector2(10, 10)
+subdivide_width = 100
+subdivide_depth = 100
