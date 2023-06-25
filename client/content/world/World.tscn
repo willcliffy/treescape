@@ -1,21 +1,21 @@
 [gd_scene load_steps=10 format=3 uid="uid://bqfjt03x1tiqw"]
 
 [ext_resource type="Script" path="res://source/world.gd" id="1_6nc55"]
-[ext_resource type="Shader" path="res://content/world/sky.gdshader" id="1_hrr8h"]
 [ext_resource type="Script" path="res://source/map.gd" id="2_4ny5k"]
+[ext_resource type="Texture2D" uid="uid://27sif7qkx5pn" path="res://assets/skybox/belfast_sunset_puresky_2k.exr" id="2_7ustk"]
 [ext_resource type="Script" path="res://source/environment.gd" id="2_r8dm3"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_irjlh"]
-shader = ExtResource("1_hrr8h")
-shader_parameter/sky_color = Color(0, 0.584314, 0.713726, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_kwhxf"]
+panorama = ExtResource("2_7ustk")
 
 [sub_resource type="Sky" id="Sky_30hgx"]
-sky_material = SubResource("ShaderMaterial_irjlh")
+sky_material = SubResource("PanoramaSkyMaterial_kwhxf")
 
 [sub_resource type="Environment" id="Environment_ndiel"]
 background_mode = 2
 sky = SubResource("Sky_30hgx")
 ssr_enabled = true
+volumetric_fog_density = 1.0535
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o5uwl"]
 transparency = 1

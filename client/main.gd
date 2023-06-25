@@ -9,6 +9,10 @@ const PORT = 8080
 var multiplayer_peer = WebSocketMultiplayerPeer.new()
 
 
+func _process(_delta):
+	$Debug/FPS.text = "FPS: " + str(Engine.get_frames_per_second())
+
+
 func _ready():
 	if "--server" in OS.get_cmdline_args():
 		start_server()

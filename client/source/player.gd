@@ -5,7 +5,7 @@ signal activated_portal
 
 @onready var NavAgent = $NavAgent
 @onready var Character = $Character
-@onready var Animations = $Character/AnimationPlayer
+#@onready var Animations = $Character/AnimationPlayer
 @onready var CameraBase = $CameraBase/Collider
 @onready var Camera = $CameraBase/Collider/Camera
 
@@ -35,7 +35,6 @@ func _ready():
 			velocity = safe_velocity
 			move_and_slide()
 	)
-	print("emiiting")
 
 
 func _input(event):
@@ -70,6 +69,22 @@ func _physics_process(delta):
 
 	if Input.is_anything_pressed():
 		handle_camera_rotation_input(delta)
+
+#	var move_direction = Vector3.ZERO
+#
+#	if Input.is_action_pressed("move_forward"):
+#		move_direction.z -= 1
+#	if Input.is_action_pressed("move_back"):
+#		move_direction.z += 1
+#	if Input.is_action_pressed("move_left"):
+#		move_direction.x -= 1
+#	if Input.is_action_pressed("move_right"):
+#		move_direction.x += 1
+#
+#	move_direction = move_direction.normalized()
+#	move_and_collide(move_direction * 50 * delta)
+#	return
+
 
 	if not moving:
 		return
@@ -123,8 +138,9 @@ func handle_movement_physics(delta):
 
 
 @rpc("call_local")
-func rpc_play_animation(animation):
-	Animations.play(animation)
+func rpc_play_animation(_animation):
+	#Animations.play(animation)
+	pass
 
 
 #func key_acquired(color):

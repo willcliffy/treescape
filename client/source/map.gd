@@ -40,12 +40,12 @@ extends Node
 
 
 # Config
-const TERRAIN_UNDULATION_RADIUS: float = 1.0
+const TERRAIN_UNDULATION_RADIUS: float = 10.0
 
 const WATER_LEVEL: float = -1.0
-const RIVER_DEPTH_RADIUS: float = 3.5
+const RIVER_DEPTH_RADIUS: float = 12.0
 
-const BANK_DEPTH: float = 10.0
+const BANK_DEPTH: float = 12.0
 const BANK_LENGTH: float = 20.0
 
 const TREE_PLACEMENT_THRESHOLD: float = 0.6
@@ -54,15 +54,15 @@ const TREE_DISTANCE_NORMAL: float = 5.0 # Minimum distance between trees
 const TREE_DISTANCE_DENSE: float = 3.0
 const TREE_START_HEIGHT: float = 0.0
 
-const DISTANCE_TO_REGENERATE_MAP: float = 1.0
+const DISTANCE_TO_REGENERATE_MAP: float = 10.0
 
 # Config Toggles
 const BANK_AT_MAP_EDGE: bool = false;
 
 # Rendering
-const RENDER_DISTANCE: float = 15.0
-const RENDER_CHUNK_SIZE: float = 3.0
-const RENDER_CHUNK_DENSITY: float = 2.0
+const RENDER_DISTANCE: float = 7.0
+const RENDER_CHUNK_SIZE: float = 50.0
+const RENDER_CHUNK_DENSITY: float = 10.0
 const RENDER_VERT_STEP: float = RENDER_CHUNK_SIZE / RENDER_CHUNK_DENSITY
 const RENDER_UV_STEP: float = 1.0 / RENDER_CHUNK_DENSITY 
 
@@ -71,14 +71,15 @@ const RENDER_UV_STEP: float = 1.0 / RENDER_CHUNK_DENSITY
 var tree_locations = []
 
 var _loaded_chunks: Dictionary = {}
-var last_generation_location = Vector2.ZERO
+var last_generation_location = Vector3.ZERO
 var target
 
 var flat_areas = [
 	{
 		"center": Vector2(0, 0),
 		"radius": 30.0,
-		"smoothness": 0.5
+		"smoothness": 0.8,
+		"height": 0.0
 	}
 ]
 
@@ -91,6 +92,9 @@ func _ready():
 		# Define the resolution of the sampling. 
 		# Lower values give more accurate results but are more computationally expensive
 		var resolution = RENDER_CHUNK_DENSITY
+		
+		if area.has("height"):
+			continue
 
 		for x in range(int(area.center.x - area.radius), int(area.center.x + area.radius), resolution):
 			for z in range(int(area.center.y - area.radius), int(area.center.y + area.radius), resolution):
@@ -108,6 +112,7 @@ func _ready():
 
 	var s := Time.get_unix_time_from_system()
 	generate(0, 0)
+	last_generation_location = Vector3(0, 0, 0)
 	var elapsed :=  Time.get_unix_time_from_system() - s
 	print("Terrain generation completed in: ", elapsed)
 
@@ -135,7 +140,9 @@ func _physics_process(_delta):
 	var chunk_x: int = int(position.x / RENDER_CHUNK_SIZE)
 	var chunk_z: int = int(position.z / RENDER_CHUNK_SIZE)
 
-	generate(chunk_x, chunk_z)
+	if last_generation_location.distance_to(target.position) >= DISTANCE_TO_REGENERATE_MAP:
+		last_generation_location = target.position
+		generate(chunk_x, chunk_z)
 
 	for key in _loaded_chunks:
 		var chunk_pos = parse_chunk_key(key)
@@ -170,7 +177,7 @@ func add_chunk(chunk_position):
 	var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
 	var arr = build_mesh_arrays(position)
 	var chunk_mesh = create_chunk_mesh(arr, chunk_position)
-	#create_navigation_region(chunk_mesh)
+	create_navigation_region(chunk_mesh)
 
 
 func build_mesh_arrays(position: Vector3):
@@ -228,7 +235,7 @@ func create_chunk_mesh(arr, chunk_position: Vector2) -> MeshInstance3D:
 
 	_loaded_chunks[make_chunk_key(chunk_position)] = chunk_mesh
 
-	chunk_mesh.create_convex_collision()
+	chunk_mesh.create_trimesh_collision()
 	add_child(chunk_mesh)
 	chunk_mesh.set_owner(self)
 
@@ -236,17 +243,19 @@ func create_chunk_mesh(arr, chunk_position: Vector2) -> MeshInstance3D:
 
 
 func create_navigation_region(chunk_mesh: MeshInstance3D) -> void:
-	var region: RID = NavigationServer3D.region_create()
-	NavigationServer3D.region_set_transform(region, Transform3D())
-	NavigationServer3D.region_set_map(region, nav_map)
+	var region = NavigationRegion3D.new()
+	NavigationServer3D.region_set_map(region.get_region_rid(), nav_map)
 
 	var nav_mesh: NavigationMesh = NavigationMesh.new()
 	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	nav_mesh.agent_radius = 1
 	nav_mesh.agent_height = 3
 	nav_mesh.agent_max_slope = 30
-	NavigationServer3D.region_set_navigation_mesh(region, nav_mesh)
-	NavigationServer3D.region_bake_navigation_mesh(nav_mesh, chunk_mesh)
+	
+	nav_mesh.create_from_mesh(chunk_mesh.mesh)
+	NavigationServer3D.region_set_navigation_mesh(region.get_region_rid(), nav_mesh)
+	add_child(region)
+	region.set_owner(self)
 
 
 func try_place_tree(terrain_pos: Vector3) -> Node3D:
@@ -309,19 +318,20 @@ func sample_terrain_noise(x: float, z: float) -> float:
 
 
 func sample_terrain_noise_unmodified(x: float, z: float) -> float:
-	var undulation_noise_sample = (terrain_undulation_noise.get_noise_2d(x, z) + 1.0) / 2.0
+	var undulation_noise_sample = terrain_undulation_noise.get_noise_2d(x, z)
 	var sample = undulation_noise_sample * TERRAIN_UNDULATION_RADIUS
 
 	var river_noise_sample = river_noise.get_noise_2d(x, z)
 	if river_noise_sample > 0:
 		sample -= river_noise_sample * RIVER_DEPTH_RADIUS
-	
+
 	if BANK_AT_MAP_EDGE:
 		var dist_from_bank = 0.7 * RENDER_DISTANCE * RENDER_CHUNK_SIZE - Vector2(x, z).length()
 		if dist_from_bank < 0:
 			sample += BANK_DEPTH * dist_from_bank / BANK_LENGTH
 
 	return sample
+
 
 func custom_smoothstep(x: float, smoothness: float) -> float:
 	var mapped_smoothness = 1 / (1 - smoothness + 0.00001)  # A small number is added to prevent division by zero
