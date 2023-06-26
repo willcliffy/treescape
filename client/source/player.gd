@@ -6,7 +6,7 @@ signal activated_portal
 @onready var character = $Character
 @onready var animationPlayer = $Character/AnimationPlayer
 
-const SPEED = 4000.0
+const SPEED = 200.0
 const TURN_SPEED = 20.0
 
 var moving = false
@@ -15,7 +15,6 @@ var withinPortalRange = false
 
 
 func _ready():
-	$Follow.remote_path = get_parent().get_node("CameraBase").get_path()
 	navigation_agent.velocity_computed.connect(
 		func(safe_velocity: Vector3):
 			velocity = safe_velocity
@@ -39,7 +38,7 @@ func _physics_process(delta):
 		direction = direction.normalized()
 
 	var current_dir = character.transform.basis.z
-	var angle = current_dir.angle_to(direction)
+	var angle = current_dir.angle_to(Vector3(direction.x, 0, direction.z))
 
 	# Determine the direction of rotation
 	var cross_product = current_dir.cross(direction)

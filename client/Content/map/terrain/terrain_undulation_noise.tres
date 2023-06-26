@@ -1,0 +1,4 @@
+[gd_resource type="FastNoiseLite" format=3 uid="uid://bjxvo4dajv883"]
+
+[resource]
+noise_type = 3

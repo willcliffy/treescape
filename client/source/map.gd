@@ -50,7 +50,7 @@ const RIVER_NOISE_FRACTAL_OCTIVES = 1
 const RIVER_NOISE_FRACTAL_GAIN = 1
 
 # Terrain config
-const TERRAIN_RADIUS = 55.0
+const TERRAIN_RADIUS = 200.0
 const TERRAIN_UNDULATION_DEPTH = 0.9
 
 # River config

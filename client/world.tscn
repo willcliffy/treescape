@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3 uid="uid://bqfjt03x1tiqw"]
+
+[ext_resource type="Texture2D" uid="uid://27sif7qkx5pn" path="res://assets/skybox/belfast_sunset_puresky_2k.exr" id="1_r0jgq"]
+[ext_resource type="PackedScene" uid="uid://cboqopwuqwuf8" path="res://content/map.tscn" id="2_aum5d"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_nplmn"]
+panorama = ExtResource("1_r0jgq")
+
+[sub_resource type="Sky" id="Sky_30hgx"]
+sky_material = SubResource("PanoramaSkyMaterial_nplmn")
+
+[sub_resource type="Environment" id="Environment_ndiel"]
+background_mode = 2
+sky = SubResource("Sky_30hgx")
+ssr_enabled = true
+
+[node name="World" type="Node3D"]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 10, 10, 10)
+light_color = Color(0.745098, 0.741176, 0, 1)
+sky_mode = 1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ndiel")
+
+[node name="Map" parent="." instance=ExtResource("2_aum5d")]
