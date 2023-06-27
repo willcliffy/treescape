@@ -3,16 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bw4cita3kf0y3"
-path.s3tc="res://.godot/imported/treeBlob.png-57e7514d4da5f8005c35e8229b790d93.s3tc.ctex"
+path.etc2="res://.godot/imported/treeBlob.png-57e7514d4da5f8005c35e8229b790d93.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/Low_Poly_Forest_Pack_Devilswork.Shop_v02/tex/treeBlob.png"
-dest_files=["res://.godot/imported/treeBlob.png-57e7514d4da5f8005c35e8229b790d93.s3tc.ctex"]
+dest_files=["res://.godot/imported/treeBlob.png-57e7514d4da5f8005c35e8229b790d93.etc2.ctex"]
 
 [params]
 

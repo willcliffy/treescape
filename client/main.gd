@@ -1,5 +1,6 @@
 extends Node
 
+@onready var performance_ui: Label = get_node("Debug/Performance")
 
 @onready var Player = preload("res://content/Player.tscn")
 @onready var World = preload("res://content/world/World.tscn")
@@ -10,12 +11,27 @@ var multiplayer_peer = WebSocketMultiplayerPeer.new()
 
 
 func _process(_delta):
-	$Debug/FPS.text = "FPS: " + str(Engine.get_frames_per_second())
+	performance_ui.text = """%d FPS (%.2f mspf)
+
+Currently rendering:
+%d objects
+%dK primitive indices
+%d draw calls
+""" % [
+	Engine.get_frames_per_second(),
+	1000.0 / Engine.get_frames_per_second(),
+	RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+	RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME) * 0.001,
+	RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+]
 
 
 func _ready():
 	if "--server" in OS.get_cmdline_args():
 		start_server()
+	else:
+		get_viewport().use_occlusion_culling = true
+		get_viewport().mesh_lod_threshold = 0.0
 
 
 func start_server():

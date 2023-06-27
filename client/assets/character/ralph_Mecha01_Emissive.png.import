@@ -3,9 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://55t6ykm4pajt"
-path.s3tc="res://.godot/imported/ralph_Mecha01_Emissive.png-e8adb233c3e81844b4c4ad857a8ef793.s3tc.ctex"
+path.etc2="res://.godot/imported/ralph_Mecha01_Emissive.png-e8adb233c3e81844b4c4ad857a8ef793.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={}
@@ -13,7 +13,7 @@ generator_parameters={}
 [deps]
 
 source_file="res://assets/character/ralph_Mecha01_Emissive.png"
-dest_files=["res://.godot/imported/ralph_Mecha01_Emissive.png-e8adb233c3e81844b4c4ad857a8ef793.s3tc.ctex"]
+dest_files=["res://.godot/imported/ralph_Mecha01_Emissive.png-e8adb233c3e81844b4c4ad857a8ef793.etc2.ctex"]
 
 [params]
 

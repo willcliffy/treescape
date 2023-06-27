@@ -173,46 +173,35 @@ func generate(x, z) -> void:
 			add_chunk(chunk_position)
 
 
+# Load the terrain data from the JSON file
+var terrain_data = load_terrain_data("res://terrain_data.json")
+
 func add_chunk(chunk_position):
-	var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
-	var chunk_mesh = create_chunk_mesh(build_mesh_arrays(position), chunk_position)
-	create_navigation_region(chunk_mesh)
+	var chunk_data = terrain_data[make_chunk_key(chunk_position)]
+	if chunk_data:
+		var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
+		var chunk_mesh = create_chunk_mesh(chunk_data, position, chunk_position)
+		create_navigation_region(chunk_mesh)
 
-
-func build_surface_tool(position: Vector3) -> SurfaceTool:
+func create_chunk_mesh(data, chunk_position: Vector3, position: Vector2) -> MeshInstance3D:
 	var st = SurfaceTool.new()
-
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_material(terrain_material)
 
-	for x in RENDER_CHUNK_DENSITY + 1:
-		for z in RENDER_CHUNK_DENSITY + 1:
-			var vert = Vector3(position.x + x * RENDER_VERT_STEP, 0.0, position.z + z * RENDER_VERT_STEP)
-			var uv = Vector2(1.0 - x * RENDER_UV_STEP, 1.0 - z * RENDER_UV_STEP)
+	# Reconstruct the mesh from the data
+	for i in range(len(data["vertices"])):
+		var vert = Vector3(data["vertices"][i]["x"], data["vertices"][i]["y"], data["vertices"][i]["z"])
+		var norm = Vector3(data["normals"][i]["x"], data["normals"][i]["y"], data["normals"][i]["z"])
+		var uv = Vector2(data["uvs"][i]["x"], data["uvs"][i]["y"])
 
-			vert.y = sample_terrain_noise(vert.x, vert.z)
+		st.add_vertex(vert)
+		st.add_normal(norm)
+		st.add_uv(uv)
 
-			var top = vert - Vector3(vert.x, sample_terrain_noise(vert.x, vert.z + RENDER_VERT_STEP), vert.z + RENDER_VERT_STEP)
-			var right = vert - Vector3(vert.x + RENDER_VERT_STEP, sample_terrain_noise(vert.x + RENDER_VERT_STEP, vert.z), vert.z)
-			var norm = top.cross(right).normalized()
+	# Add triangles
+	for i in range(0, len(data["indices"]), 3):
+		st.add_triangle_fan([data["indices"][i], data["indices"][i + 1], data["indices"][i + 2]])
 
-			st.add_vertex(vert)
-			st.add_normal(norm)
-			st.add_uv(uv)
-
-			# Make & index a clockwise face from verts a, b, c, d
-			if x < RENDER_CHUNK_DENSITY and z < RENDER_CHUNK_DENSITY:
-				var a = z + x * (RENDER_CHUNK_DENSITY + 1)
-				var b = a + 1
-				var d = (RENDER_CHUNK_DENSITY + 1) * (x + 1) + z
-				var c = d + 1
-
-				st.add_triangle_fan([d, b, a, d, c, b])
-
-	return st
-
-
-func create_chunk_mesh(st: SurfaceTool, chunk_position: Vector2) -> MeshInstance3D:
 	var chunk_mesh = MeshInstance3D.new()
 
 	chunk_mesh.mesh = st.commit()
@@ -224,6 +213,17 @@ func create_chunk_mesh(st: SurfaceTool, chunk_position: Vector2) -> MeshInstance
 	_loaded_chunks[make_chunk_key(chunk_position)] = chunk_mesh
 
 	return chunk_mesh
+
+# Helper function to load the terrain data from the JSON file
+func load_terrain_data(file_path):
+	var file = File.new()
+	if file.open(file_path, File.READ) == OK:
+		var data = parse_json(file.get_as_text())
+		file.close()
+		return data
+	else:
+		print("Failed to open file at path: ", file_path)
+		return {}
 
 
 func create_navigation_region(chunk_mesh: MeshInstance3D) -> void:

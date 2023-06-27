@@ -1,0 +1,18 @@
+{
+  "terrainSize": 10.0,
+  "simplexNoise": {
+    "frequency": 0.1,
+    "amplitude": 1.0,
+    "seed": 0
+  },
+  "worleyNoise": {
+    "frequency": 0.1,
+    "amplitude": 1.0,
+    "seed": 2
+  },
+  "perlinNoise": {
+    "frequency": 0.1,
+    "amplitude": 1.0,
+    "seed": 3
+  }
+}

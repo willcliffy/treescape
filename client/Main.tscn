@@ -1,0 +1,58 @@
+[gd_scene load_steps=3 format=3 uid="uid://ugg6wqgw8xmk"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_o5hc3"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_7trr4"]
+font_size = 24
+font_color = Color(0, 0, 0, 1)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_o5hc3")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://content/Player.tscn")
+spawn_path = NodePath("..")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Host" type="Button" parent="UI"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="Join" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 473.0
+offset_top = 292.0
+offset_right = 625.0
+offset_bottom = 390.0
+text = "join"
+
+[node name="Address" type="LineEdit" parent="UI"]
+layout_mode = 0
+offset_left = 268.0
+offset_top = 175.0
+offset_right = 849.0
+offset_bottom = 206.0
+text = "wss://clownfish-app-w3tew.ondigitalocean.app/"
+alignment = 1
+
+[node name="Debug" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Performance" type="Label" parent="Debug"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+label_settings = SubResource("LabelSettings_7trr4")
+
+[connection signal="pressed" from="UI/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="UI/Join" to="." method="_on_join_pressed"]
+[connection signal="text_submitted" from="UI/Address" to="." method="_on_address_text_submitted"]

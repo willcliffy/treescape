@@ -9,7 +9,7 @@ signal activated_portal
 @onready var CameraBase = $CameraBase/Collider
 @onready var Camera = $CameraBase/Collider/Camera
 
-const SPEED = 250.0
+const SPEED = 2500.0
 const TURN_SPEED = 20.0
 
 const CAMERA_ROTATION_SPEED = 50.0
