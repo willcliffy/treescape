@@ -3,16 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ockaa0ae6v3x"
-path.etc2="res://.godot/imported/AncientCosmicPortal-0-Portal_Stairs.png-0646900c25034fb8c5b103a58b95e68e.etc2.ctex"
+path.s3tc="res://.godot/imported/AncientCosmicPortal-0-Portal_Stairs.png-0646900c25034fb8c5b103a58b95e68e.s3tc.ctex"
 metadata={
-"imported_formats": ["etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/portal/AncientCosmicPortal-0-Portal_Stairs.png"
-dest_files=["res://.godot/imported/AncientCosmicPortal-0-Portal_Stairs.png-0646900c25034fb8c5b103a58b95e68e.etc2.ctex"]
+dest_files=["res://.godot/imported/AncientCosmicPortal-0-Portal_Stairs.png-0646900c25034fb8c5b103a58b95e68e.s3tc.ctex"]
 
 [params]
 

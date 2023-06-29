@@ -6,7 +6,7 @@ uniform vec4 color_high: source_color = vec4(0.184, 0.63, 0.176, 1.0); // Green
 
 // Uniforms to adjust the range of height over which the gradient occurs
 uniform float height_low: hint_range(-10.0, 10.0) = -10.0;
-uniform float height_high: hint_range(-10.0, 10.0) = 5.0;
+uniform float height_high: hint_range(-10.0, 10.0) = 10.0;
 
 
 varying vec3 world_position;

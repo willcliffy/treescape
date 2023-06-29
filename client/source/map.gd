@@ -60,13 +60,6 @@ const DISTANCE_TO_REGENERATE_MAP: float = 10.0
 # Config Toggles
 const BANK_AT_MAP_EDGE: bool = false;
 
-# Rendering
-const RENDER_DISTANCE: float = 5.0
-const RENDER_CHUNK_SIZE: float = 100.0
-const RENDER_CHUNK_DENSITY: float = 1.0
-const RENDER_VERT_STEP: float = RENDER_CHUNK_SIZE / RENDER_CHUNK_DENSITY
-const RENDER_UV_STEP: float = 1.0 / RENDER_CHUNK_DENSITY 
-
 
 ## Terrain generation
 var tree_locations = []
@@ -86,33 +79,13 @@ var flat_areas = [
 
 
 func _ready():
-	for area in flat_areas:
-		var total_height = 0.0
-		var sample_count = 0
-
-		# Define the resolution of the sampling. 
-		# Lower values give more accurate results but are more computationally expensive
-		var resolution = RENDER_CHUNK_DENSITY
-		
-		if area.has("height"):
-			continue
-
-		for x in range(int(area.center.x - area.radius), int(area.center.x + area.radius), resolution):
-			for z in range(int(area.center.y - area.radius), int(area.center.y + area.radius), resolution):
-				var dist = Vector2(x, z).distance_to(area.center)
-				if dist <= area.radius:
-					total_height += sample_terrain_noise_unmodified(x, z)
-					sample_count += 1
-
-		area.height = total_height / sample_count if sample_count != 0 else 0.0
-
 	NavigationServer3D.map_set_edge_connection_margin(nav_map, 5)
 
 	# see: https://docs.godotengine.org/en/4.0/tutorials/navigation/navigation_using_navigationservers.html#waiting-for-synchronization
 	await get_tree().physics_frame
 
 	var s := Time.get_unix_time_from_system()
-	generate(0, 0)
+	generate_all()
 	last_generation_location = Vector3(0, 0, 0)
 	var elapsed :=  Time.get_unix_time_from_system() - s
 	print("Terrain generation completed in: ", elapsed)
@@ -129,28 +102,6 @@ func _ready():
 #	player.activated_portal.connect(portal_instance.enable)
 
 
-func _physics_process(_delta):
-	if not target:
-		return
-
-	var position = Vector3.ZERO
-	if target:
-		position = target.position
-	if position.x < 0: position.x -= RENDER_CHUNK_SIZE
-	if position.z < 0: position.z -= RENDER_CHUNK_SIZE
-	var chunk_x: int = int(position.x / RENDER_CHUNK_SIZE)
-	var chunk_z: int = int(position.z / RENDER_CHUNK_SIZE)
-
-	if last_generation_location.distance_to(target.position) >= DISTANCE_TO_REGENERATE_MAP:
-		last_generation_location = target.position
-		generate(chunk_x, chunk_z)
-
-	for key in _loaded_chunks:
-		var chunk_pos = parse_chunk_key(key)
-		if chunk_pos.distance_to(Vector2(chunk_x, chunk_z)) > RENDER_DISTANCE:
-			remove_chunk(key)
-
-
 func _exit_tree():
 	for chunk_key in _loaded_chunks:
 		remove_chunk(chunk_key)
@@ -162,66 +113,54 @@ func link_local_player(player):
 
 ### Terrain generation ###
 
-func generate(x, z) -> void:
-	for ix in range(x - RENDER_DISTANCE, x + RENDER_DISTANCE + 1):
-		for iz in range(z - RENDER_DISTANCE, z + RENDER_DISTANCE + 1):
-			var chunk_position = Vector2(ix, iz)
-			if chunk_position.distance_to(Vector2(x, z)) > RENDER_DISTANCE: 
-				continue
-			if _loaded_chunks.has(make_chunk_key(chunk_position)): 
-				continue
-			add_chunk(chunk_position)
+func generate_all() :
+	var f = FileAccess.open("res://output.json", FileAccess.READ)
+	var data = f.get_as_text()
+	f.close()
 
+	var json = JSON.parse_string(data)
 
-func add_chunk(chunk_position):
-	var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
-	var chunk_mesh = create_chunk_mesh(build_mesh_arrays(position), chunk_position)
-	create_navigation_region(chunk_mesh)
+	for key in json.keys():
+		var chunk_mesh = create_chunk_mesh(mesh_array_from_dictionary(json[key]))
+		_loaded_chunks[key] = chunk_mesh
+		create_navigation_region(chunk_mesh)
 
+func mesh_array_from_dictionary(chunk_data: Dictionary) -> Array:
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
 
-func build_surface_tool(position: Vector3) -> SurfaceTool:
-	var st = SurfaceTool.new()
+	var verts = PackedVector3Array()
+	for vertex in chunk_data["vertices"]:
+		verts.push_back(Vector3(vertex["X"], vertex["Y"], vertex["Z"]))
+	
+	var norms = PackedVector3Array()
+	for normal in chunk_data["normals"]:
+		norms.push_back(Vector3(normal["X"], normal["Y"], normal["Z"]))
+	
+	var uvs = PackedVector2Array()
+	for uv in chunk_data["uvs"]:
+		uvs.push_back(Vector2(uv["X"], uv["Z"]))
 
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st.set_material(terrain_material)
+	var inds = PackedInt32Array()
+	for index in chunk_data["indices"]:
+		inds.push_back(index)
 
-	for x in RENDER_CHUNK_DENSITY + 1:
-		for z in RENDER_CHUNK_DENSITY + 1:
-			var vert = Vector3(position.x + x * RENDER_VERT_STEP, 0.0, position.z + z * RENDER_VERT_STEP)
-			var uv = Vector2(1.0 - x * RENDER_UV_STEP, 1.0 - z * RENDER_UV_STEP)
+	arr[Mesh.ARRAY_VERTEX] = verts
+	arr[Mesh.ARRAY_TEX_UV] = uvs
+	arr[Mesh.ARRAY_NORMAL] = norms
+	arr[Mesh.ARRAY_INDEX]  = inds
 
-			vert.y = sample_terrain_noise(vert.x, vert.z)
+	return arr
 
-			var top = vert - Vector3(vert.x, sample_terrain_noise(vert.x, vert.z + RENDER_VERT_STEP), vert.z + RENDER_VERT_STEP)
-			var right = vert - Vector3(vert.x + RENDER_VERT_STEP, sample_terrain_noise(vert.x + RENDER_VERT_STEP, vert.z), vert.z)
-			var norm = top.cross(right).normalized()
-
-			st.add_vertex(vert)
-			st.add_normal(norm)
-			st.add_uv(uv)
-
-			# Make & index a clockwise face from verts a, b, c, d
-			if x < RENDER_CHUNK_DENSITY and z < RENDER_CHUNK_DENSITY:
-				var a = z + x * (RENDER_CHUNK_DENSITY + 1)
-				var b = a + 1
-				var d = (RENDER_CHUNK_DENSITY + 1) * (x + 1) + z
-				var c = d + 1
-
-				st.add_triangle_fan([d, b, a, d, c, b])
-
-	return st
-
-
-func create_chunk_mesh(st: SurfaceTool, chunk_position: Vector2) -> MeshInstance3D:
+func create_chunk_mesh(arr) -> MeshInstance3D:
 	var chunk_mesh = MeshInstance3D.new()
+	chunk_mesh.mesh = ArrayMesh.new()
+	chunk_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	chunk_mesh.mesh.surface_set_material(0, terrain_material)
 
-	chunk_mesh.mesh = st.commit()
 	chunk_mesh.create_trimesh_collision()
-
 	add_child(chunk_mesh)
 	chunk_mesh.set_owner(self)
-
-	_loaded_chunks[make_chunk_key(chunk_position)] = chunk_mesh
 
 	return chunk_mesh
 
@@ -272,11 +211,6 @@ func try_place_tree(terrain_pos: Vector3) -> Node3D:
 	tree_locations.append(terrain_pos)
 	return tree_instance
 
-
-func try_place_water():
-	SurfaceTool.new()
-
-
 func remove_chunk(key: String) -> void:
 	var chunk = _loaded_chunks[key]
 	var erased = _loaded_chunks.erase(key)
@@ -286,40 +220,6 @@ func remove_chunk(key: String) -> void:
 
 func make_chunk_key(chunk_position: Vector2) -> String:
 	return str(chunk_position.x, ",", chunk_position.y)
-
-
-func parse_chunk_key(key: String) -> Vector2:
-	var arr_vec = key.split(",")
-	#print(Vector2(int(arr_vec[0]), int(arr_vec[1])))
-	return Vector2(int(arr_vec[0]), int(arr_vec[1]))
-
-
-func sample_terrain_noise(x: float, z: float) -> float:
-	for area in flat_areas:
-		var distance_to_center = area.center.distance_to(Vector2(x, z))
-		if distance_to_center < area.radius:
-			var normalized_distance = distance_to_center / area.radius
-			var smoothed_distance = custom_smoothstep(normalized_distance, area.smoothness)
-			return lerp(area.height, sample_terrain_noise_unmodified(x, z), smoothed_distance)
-
-	return sample_terrain_noise_unmodified(x, z)
-
-
-func sample_terrain_noise_unmodified(x: float, z: float) -> float:
-	var undulation_noise_sample = terrain_undulation_noise.get_noise_2d(x, z)
-	var sample = undulation_noise_sample * TERRAIN_UNDULATION_RADIUS
-
-	var river_noise_sample = river_noise.get_noise_2d(x, z)
-	if river_noise_sample > 0:
-		sample -= river_noise_sample * RIVER_DEPTH_RADIUS
-
-	if BANK_AT_MAP_EDGE:
-		var dist_from_bank = 0.7 * RENDER_DISTANCE * RENDER_CHUNK_SIZE - Vector2(x, z).length()
-		if dist_from_bank < 0:
-			sample += BANK_DEPTH * dist_from_bank / BANK_LENGTH
-
-	return sample
-
 
 func custom_smoothstep(x: float, smoothness: float) -> float:
 	var mapped_smoothness = 1 / (1 - smoothness + 0.00001)  # A small number is added to prevent division by zero

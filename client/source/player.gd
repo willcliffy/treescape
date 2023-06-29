@@ -101,7 +101,7 @@ func handle_camera_zoom_input(event):
 	if event.button_index == MOUSE_BUTTON_WHEEL_UP and Camera.position.y > 5:
 		Camera.position.y -= 1
 		return
-	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 500:
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 5000:
 		Camera.position.y += 1
 		return
 
@@ -111,7 +111,7 @@ func handle_camera_rotation_input(delta):
 	if rotate_horizontal != 0 or rotate_vertical != 0:
 		var new_rotation = CameraBase.rotation_degrees
 		new_rotation.y += rotate_horizontal * delta * CAMERA_ROTATION_SPEED
-		new_rotation.x = clamp(new_rotation.x + rotate_vertical * delta * CAMERA_ROTATION_SPEED, 5, 85)
+		new_rotation.x = clamp(new_rotation.x + rotate_vertical * delta * CAMERA_ROTATION_SPEED, -90, 90)
 		CameraBase.rotation_degrees = new_rotation
 
 
