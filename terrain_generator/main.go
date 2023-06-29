@@ -1,18 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"math"
+
+	"github.com/willcliffy/treescape/terrain/noise"
 )
 
 const (
 	RENDER_DISTANCE      = 10.0
 	RENDER_CHUNK_SIZE    = 50.0
-	RENDER_CHUNK_DENSITY = 8.0
+	RENDER_CHUNK_DENSITY = 5.0
 	RENDER_VERT_STEP     = RENDER_CHUNK_SIZE / RENDER_CHUNK_DENSITY
 	RENDER_UV_STEP       = 1.0 / RENDER_CHUNK_DENSITY
 
-	TERRAIN_AMPLITUDE = 20.0
-	RIVER_AMPLITUDE   = 12.0
+	TERRAIN_AMPLITUDE    = 15.0
+	RIVER_AMPLITUDE      = 10.0
+	RIVER_THRESHOLD      = 0.5
+	RIVER_BANK_THRESHOLD = 0.1
 )
 
 var flatAreas = []FlatArea{
@@ -25,12 +30,12 @@ var flatAreas = []FlatArea{
 }
 
 type TerrainGenerator struct {
-	terrain *FractalFBMNoise
-	river   *FractalFBMNoise
+	terrain *noise.FractalFBMNoise
+	river   *noise.FractalRidgedNoise
 }
 
-func (tg TerrainGenerator) Sample(x, z float64) float64 {
-	raw := tg.sampleRaw(x, z)
+func (tg TerrainGenerator) Sample(x, z float64) (float64, bool) {
+	raw, hasWater := tg.sampleRaw(x, z)
 
 	for _, area := range flatAreas {
 		distanceToCenter := area.center.DistanceToV2(Vector2{x, z})
@@ -40,21 +45,34 @@ func (tg TerrainGenerator) Sample(x, z float64) float64 {
 
 		normalizedDist := distanceToCenter / area.radius
 		smoothedDist := customSmoothstep(normalizedDist, area.smoothness)
-		return lerp(area.height, raw, smoothedDist)
+		return lerp(area.height, raw, smoothedDist), hasWater
 	}
 
-	return raw
+	return raw, hasWater
 }
 
-func (tg TerrainGenerator) sampleRaw(x, z float64) float64 {
+var samples []float64
+
+func (tg TerrainGenerator) sampleRaw(x, z float64) (float64, bool) {
+	hasWater := false
 	terrainSample := TERRAIN_AMPLITUDE * tg.terrain.Eval2(x, z)
 
-	// riverSample := tg.river.Eval2(x, z)
-	// if riverSample > 0 {
-	// 	terrainSample -= RIVER_AMPLITUDE * riverSample
-	// }
+	riverSample := (tg.river.Eval2(x, z) - 0.5) * 2.0
+	if riverSample > RIVER_THRESHOLD {
+		hasWater = true
+		terrainSample = lerp(-RIVER_AMPLITUDE, terrainSample, 0.25)
+	} else if riverSample > RIVER_BANK_THRESHOLD {
+		closenessToRiver := (riverSample - RIVER_BANK_THRESHOLD) / (RIVER_THRESHOLD - RIVER_BANK_THRESHOLD)
+		if terrainSample < 0 {
+			terrainSample = lerp(terrainSample, -1.5*terrainSample, closenessToRiver)
+		} else {
+			terrainSample = lerp(terrainSample, 1.5*terrainSample, closenessToRiver)
+		}
+	}
 
-	return terrainSample
+	samples = append(samples, riverSample)
+
+	return terrainSample, hasWater
 }
 
 func customSmoothstep(x, smoothness float64) float64 {
@@ -71,8 +89,8 @@ func lerp(a, b, t float64) float64 {
 func main() {
 	// Initialize noise functions
 	tg := TerrainGenerator{
-		terrain: NewDefaultFractalFBMNoise(0),
-		river:   NewDefaultFractalFBMNoise(0),
+		terrain: noise.NewDefaultFractalFBMNoise(0),
+		river:   noise.NewDefaultFractalRidgedNoise(0),
 	}
 
 	chunkMap := make(ChunkMap)
@@ -92,4 +110,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	tot := 0.0
+	max := -100.0
+	min := 100.0
+
+	for _, x := range samples {
+		tot += x
+		if x > max {
+			max = x
+		}
+		if x < min {
+			min = x
+		}
+	}
+
+	fmt.Printf("%v avg, %v max, %v min\n", tot/float64(len(samples)), max, min)
 }

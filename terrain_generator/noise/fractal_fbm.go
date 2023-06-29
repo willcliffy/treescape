@@ -1,4 +1,4 @@
-package main
+package noise
 
 import "github.com/ojrac/opensimplex-go"
 

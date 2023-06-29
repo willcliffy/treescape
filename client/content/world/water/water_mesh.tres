@@ -4,6 +4,6 @@
 
 [resource]
 material = ExtResource("1_hiwso")
-size = Vector2(10, 10)
+size = Vector2(50, 50)
 subdivide_width = 100
 subdivide_depth = 100

@@ -13,7 +13,7 @@ void vertex() {
     float time = TIME;
 
     // UV function
-    vec2 uvModifier = vec2(0.10000, 0.10000);
+    vec2 uvModifier = vec2(0.20000, 0.20000);
     vec2 uv = time * uvModifier + UV;
 
     // Sample from texture 2D

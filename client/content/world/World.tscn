@@ -1,32 +1,50 @@
-[gd_scene load_steps=10 format=3 uid="uid://bqfjt03x1tiqw"]
+[gd_scene load_steps=8 format=3 uid="uid://bqfjt03x1tiqw"]
 
 [ext_resource type="Script" path="res://source/world.gd" id="1_6nc55"]
 [ext_resource type="Script" path="res://source/map.gd" id="2_4ny5k"]
-[ext_resource type="Texture2D" uid="uid://27sif7qkx5pn" path="res://assets/skybox/belfast_sunset_puresky_2k.exr" id="2_7ustk"]
 [ext_resource type="Script" path="res://source/environment.gd" id="2_r8dm3"]
+[ext_resource type="Shader" path="res://content/world/sky.gdshader" id="2_wvu7m"]
 
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_kwhxf"]
-panorama = ExtResource("2_7ustk")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uugkv"]
+shader = ExtResource("2_wvu7m")
+shader_parameter/clouds_edge_color = Color(0.8, 0.8, 0.98, 1)
+shader_parameter/clouds_top_color = Color(1, 1, 1, 1)
+shader_parameter/clouds_middle_color = Color(0.92, 0.92, 0.98, 1)
+shader_parameter/clouds_bottom_color = Color(0.83, 0.83, 0.94, 1)
+shader_parameter/clouds_speed = 2.0
+shader_parameter/clouds_direction = 0.2
+shader_parameter/clouds_scale = 1.0
+shader_parameter/clouds_cutoff = 0.3
+shader_parameter/clouds_fuzziness = 0.5
+shader_parameter/clouds_weight = 0.0
+shader_parameter/clouds_blur = 0.25
+shader_parameter/horizon_color = Color(0, 0.7, 0.8, 1)
+shader_parameter/horizon_blur = 0.05
+shader_parameter/moon_color = Color(1, 0.95, 0.7, 1)
+shader_parameter/moon_size = 0.06
+shader_parameter/moon_blur = 0.1
+shader_parameter/overwritten_time = 0.0
+shader_parameter/day_top_color = Color(0.1, 0.6, 1, 1)
+shader_parameter/day_bottom_color = Color(0.4, 0.8, 1, 1)
+shader_parameter/sunset_top_color = Color(0.7, 0.75, 1, 1)
+shader_parameter/sunset_bottom_color = Color(1, 0.5, 0.7, 1)
+shader_parameter/night_top_color = Color(0.02, 0, 0.04, 1)
+shader_parameter/night_bottom_color = Color(0.1, 0, 0.2, 1)
+shader_parameter/stars_speed = 1.0
+shader_parameter/sun_color = Color(10, 8, 1, 1)
+shader_parameter/sun_sunset_color = Color(10, 0, 0, 1)
+shader_parameter/sun_size = 0.2
+shader_parameter/sun_blur = 10.0
 
 [sub_resource type="Sky" id="Sky_30hgx"]
-sky_material = SubResource("PanoramaSkyMaterial_kwhxf")
+sky_material = SubResource("ShaderMaterial_uugkv")
 
 [sub_resource type="Environment" id="Environment_ndiel"]
 background_mode = 2
 sky = SubResource("Sky_30hgx")
 ssr_enabled = true
+glow_enabled = true
 volumetric_fog_density = 1.0535
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o5uwl"]
-transparency = 1
-shading_mode = 0
-albedo_color = Color(0.905882, 0.905882, 0, 1)
-disable_receive_shadows = true
-
-[sub_resource type="SphereMesh" id="SphereMesh_vc2vj"]
-material = SubResource("StandardMaterial3D_o5uwl")
-radius = 10.0
-height = 20.0
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_6nc55")
@@ -34,19 +52,22 @@ script = ExtResource("1_6nc55")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_ndiel")
 script = ExtResource("2_r8dm3")
-time_multiplyer = 20.0
+day_time = 10.4348
+time_scale = 0.25
+sun_base_enegry = 2.0
+moon_base_enegry = 2.0
 
-[node name="Sun" type="Node3D" parent="WorldEnvironment"]
-
-[node name="SunLight" type="DirectionalLight3D" parent="WorldEnvironment/Sun"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 350, 0)
+[node name="Sun" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.920865, 0, -0.38988, 0.357603, 0.398397, 0.84463, 0.155327, -0.917213, 0.36687, 0, 0, 0)
+rotation_order = 4
+visible = false
 light_color = Color(1, 0.862745, 0.713726, 1)
 light_energy = 2.0
 
-[node name="SunMesh" type="MeshInstance3D" parent="WorldEnvironment/Sun"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 350, 0)
-mesh = SubResource("SphereMesh_vc2vj")
-skeleton = NodePath("../..")
+[node name="Moon" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.997316, 0, -0.0732108, 0.0480183, 0.754856, 0.654131, 0.0552636, -0.655891, 0.75283, 0, 0, 0)
+rotation_order = 4
+light_energy = 2.0
 
 [node name="Map" type="Node3D" parent="."]
 script = ExtResource("2_4ny5k")

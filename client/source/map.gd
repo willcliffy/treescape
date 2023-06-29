@@ -35,7 +35,6 @@ extends Node
 # Meshes
 @onready var water_mesh = preload("res://content/world/water/water_mesh.tres")
 
-
 # Misc
 @onready var nav_map = get_parent().get_world_3d().get_navigation_map()
 
@@ -43,7 +42,7 @@ extends Node
 # Config
 const TERRAIN_UNDULATION_RADIUS: float = 10.0
 
-const WATER_LEVEL: float = -1.0
+const WATER_LEVEL: float = -5.0
 const RIVER_DEPTH_RADIUS: float = 12.0
 
 const BANK_DEPTH: float = 12.0
@@ -121,7 +120,13 @@ func generate_all() :
 	var json = JSON.parse_string(data)
 
 	for key in json.keys():
+		var chunk_position = parse_chunk_key(key)
 		var chunk_mesh = create_chunk_mesh(mesh_array_from_dictionary(json[key]))
+		if json[key]["properties"]["has_water"]:
+			var water_mesh_tile := MeshInstance3D.new()
+			water_mesh_tile.position = Vector3(chunk_position.x + 25, WATER_LEVEL, chunk_position.y + 25)
+			water_mesh_tile.mesh = water_mesh
+			chunk_mesh.add_child(water_mesh_tile)
 		_loaded_chunks[key] = chunk_mesh
 		create_navigation_region(chunk_mesh)
 
@@ -220,6 +225,10 @@ func remove_chunk(key: String) -> void:
 
 func make_chunk_key(chunk_position: Vector2) -> String:
 	return str(chunk_position.x, ",", chunk_position.y)
+
+func parse_chunk_key(key: String) -> Vector2:
+	var parts = key.split(":")
+	return Vector2(int(parts[0]), int(parts[1]))
 
 func custom_smoothstep(x: float, smoothness: float) -> float:
 	var mapped_smoothness = 1 / (1 - smoothness + 0.00001)  # A small number is added to prevent division by zero

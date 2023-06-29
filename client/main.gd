@@ -31,7 +31,7 @@ func _ready():
 		start_server()
 	else:
 		get_viewport().use_occlusion_culling = true
-		get_viewport().mesh_lod_threshold = 0.0
+		get_viewport().mesh_lod_threshold = 1.0
 
 
 func start_server():

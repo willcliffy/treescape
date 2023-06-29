@@ -5,7 +5,7 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_eerom")
-shader_parameter/color_low = Color(0.396, 0.263, 0.129, 1)
-shader_parameter/color_high = Color(0.184, 0.63, 0.176, 1)
-shader_parameter/height_low = -10.0
-shader_parameter/height_high = 10.0
+shader_parameter/color_low = Color(0.3207, 0.196407, 0.0926759, 1)
+shader_parameter/color_high = Color(0.239216, 0.45098, 0.0705882, 1)
+shader_parameter/height_low = -4.0
+shader_parameter/height_high = 2.0

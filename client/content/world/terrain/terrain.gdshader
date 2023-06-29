@@ -1,8 +1,8 @@
 shader_type spatial;
 render_mode diffuse_toon, specular_toon;
 
-uniform vec4 color_low: source_color = vec4(0.396, 0.263, 0.129, 1.0); // Brown
-uniform vec4 color_high: source_color = vec4(0.184, 0.63, 0.176, 1.0); // Green
+uniform vec4 color_low: source_color = vec4(0.40, 0.25, 0.125, 1.0); // Brown
+uniform vec4 color_high: source_color = vec4(0.2, 0.60, 0.175, 1.0); // Green
 
 // Uniforms to adjust the range of height over which the gradient occurs
 uniform float height_low: hint_range(-10.0, 10.0) = -10.0;
