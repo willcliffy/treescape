@@ -3,16 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ca51qx46e1r77"
-path.etc2="res://.godot/imported/treeRound.png-93ca33fe4b068d929dfcbe6c2462cffa.etc2.ctex"
+path.s3tc="res://.godot/imported/treeRound.png-93ca33fe4b068d929dfcbe6c2462cffa.s3tc.ctex"
 metadata={
-"imported_formats": ["etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/Low_Poly_Forest_Pack_Devilswork.Shop_v02/tex/treeRound.png"
-dest_files=["res://.godot/imported/treeRound.png-93ca33fe4b068d929dfcbe6c2462cffa.etc2.ctex"]
+dest_files=["res://.godot/imported/treeRound.png-93ca33fe4b068d929dfcbe6c2462cffa.s3tc.ctex"]
 
 [params]
 

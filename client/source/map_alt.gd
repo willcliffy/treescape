@@ -112,7 +112,7 @@ func _ready():
 	await get_tree().physics_frame
 
 	var s := Time.get_unix_time_from_system()
-	generate(0, 0)
+	generate_all()
 	last_generation_location = Vector3(0, 0, 0)
 	var elapsed :=  Time.get_unix_time_from_system() - s
 	print("Terrain generation completed in: ", elapsed)
@@ -162,6 +162,14 @@ func link_local_player(player):
 
 ### Terrain generation ###
 
+func generate_all() -> void:
+	var terrain_data = load_terrain_data("res://terrain.json")
+	for chunk_data in terrain_data:
+		var chunk_position = chunk_data["chunk_position"]
+		var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
+		var chunk_mesh = create_chunk_mesh(chunk_data, position)
+		create_navigation_region(chunk_mesh)
+
 func generate(x, z) -> void:
 	for ix in range(x - RENDER_DISTANCE, x + RENDER_DISTANCE + 1):
 		for iz in range(z - RENDER_DISTANCE, z + RENDER_DISTANCE + 1):
@@ -174,16 +182,17 @@ func generate(x, z) -> void:
 
 
 # Load the terrain data from the JSON file
-var terrain_data = load_terrain_data("res://terrain_data.json")
+
 
 func add_chunk(chunk_position):
-	var chunk_data = terrain_data[make_chunk_key(chunk_position)]
-	if chunk_data:
-		var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
-		var chunk_mesh = create_chunk_mesh(chunk_data, position, chunk_position)
-		create_navigation_region(chunk_mesh)
+	var _key := make_chunk_key(chunk_position)
+#	var chunk_data = terrain_data[key]
+#	if chunk_data:
+#		var position = Vector3(chunk_position.x * RENDER_CHUNK_SIZE, 0, chunk_position.y * RENDER_CHUNK_SIZE)
+#		var chunk_mesh = create_chunk_mesh(chunk_data, position, chunk_position)
+#		create_navigation_region(chunk_mesh)
 
-func create_chunk_mesh(data, chunk_position: Vector3, position: Vector2) -> MeshInstance3D:
+func create_chunk_mesh(data, chunk_position: Vector3) -> MeshInstance3D:
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_material(terrain_material)
@@ -193,19 +202,19 @@ func create_chunk_mesh(data, chunk_position: Vector3, position: Vector2) -> Mesh
 		var vert = Vector3(data["vertices"][i]["x"], data["vertices"][i]["y"], data["vertices"][i]["z"])
 		var norm = Vector3(data["normals"][i]["x"], data["normals"][i]["y"], data["normals"][i]["z"])
 		var uv = Vector2(data["uvs"][i]["x"], data["uvs"][i]["y"])
-
+		
+		st.set_normal(norm)
+		st.set_uv(uv)
 		st.add_vertex(vert)
-		st.add_normal(norm)
-		st.add_uv(uv)
 
 	# Add triangles
-	for i in range(0, len(data["indices"]), 3):
-		st.add_triangle_fan([data["indices"][i], data["indices"][i + 1], data["indices"][i + 2]])
+	#for i in range(0, len(data["indices"]), 3):
+	#	st.add_triangle_fan([data["indices"][i], data["indices"][i + 1], data["indices"][i + 2]])
 
 	var chunk_mesh = MeshInstance3D.new()
 
 	chunk_mesh.mesh = st.commit()
-	chunk_mesh.create_trimesh_collision()
+	#chunk_mesh.create_trimesh_collision()
 
 	add_child(chunk_mesh)
 	chunk_mesh.set_owner(self)
@@ -216,14 +225,10 @@ func create_chunk_mesh(data, chunk_position: Vector3, position: Vector2) -> Mesh
 
 # Helper function to load the terrain data from the JSON file
 func load_terrain_data(file_path):
-	var file = File.new()
-	if file.open(file_path, File.READ) == OK:
-		var data = parse_json(file.get_as_text())
-		file.close()
-		return data
-	else:
-		print("Failed to open file at path: ", file_path)
-		return {}
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	var data = JSON.parse_string(file.get_as_text())
+	file.close()
+	return data
 
 
 func create_navigation_region(chunk_mesh: MeshInstance3D) -> void:
@@ -284,7 +289,7 @@ func remove_chunk(key: String) -> void:
 	if erased: chunk.queue_free()
 
 
-func make_chunk_key(chunk_position: Vector2) -> String:
+func make_chunk_key(chunk_position) -> String:
 	return str(chunk_position.x, ",", chunk_position.y)
 
 
