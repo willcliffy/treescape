@@ -1,7 +1,7 @@
 extends Node
 
 ## Scenes
-@onready var portal_scene = preload("res://content/map/Portal.tscn")
+#@onready var portal_scene = preload("res://content/map/Portal.tscn")
 @onready var tree_scenes = [
 	preload("res://content/map/trees/tree_01.tscn"),
 	preload("res://content/map/trees/tree_02.tscn"),
