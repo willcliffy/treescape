@@ -38,7 +38,6 @@ offset_left = 414.0
 offset_top = 175.0
 offset_right = 702.0
 offset_bottom = 206.0
-
 text = "wss://clownfish-app-w3tew.ondigitalocean.app/"
 placeholder_text = "wss://clownfish-app-w3tew.ondigitalocean.app/"
 alignment = 1

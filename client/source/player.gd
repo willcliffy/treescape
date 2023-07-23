@@ -73,6 +73,7 @@ func _physics_process(delta):
 
 	if NavAgent.is_navigation_finished():
 		moving = false
+		velocity = Vector3.ZERO
 		rpc_play_animation.rpc("idle")
 		return
 
@@ -83,7 +84,7 @@ func handle_camera_zoom_input(event):
 	if event.button_index == MOUSE_BUTTON_WHEEL_UP and Camera.position.y > 2:
 		Camera.position.y -= 1
 		return
-	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 30:
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and Camera.position.y < 500:
 		Camera.position.y += 1
 		return
 
