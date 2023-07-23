@@ -26,7 +26,6 @@ func _enter_tree():
 
 
 func _ready():
-	print(is_multiplayer_authority())
 	if not is_multiplayer_authority(): return
 
 	Camera.current = true
